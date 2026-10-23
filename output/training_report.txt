@@ -1,0 +1,30 @@
+LOAN MODEL TRAINING REPORT
+========================================================================
+Dataset: /Users/sukrit/Desktop/SMT/borrowers.csv
+Rows after cleaning: 32416
+Train rows: 22691
+Validation rows: 4862
+Test rows: 4863
+
+RANDOM FOREST BEST PARAMETERS
+{'classifier__max_depth': 15, 'classifier__min_samples_split': 2, 'classifier__n_estimators': 300}
+
+XGBOOST BEST PARAMETERS
+{'classifier__colsample_bytree': 0.8, 'classifier__learning_rate': 0.1, 'classifier__max_depth': 6, 'classifier__n_estimators': 200, 'classifier__subsample': 0.8}
+
+METRICS BY MODEL AND SPLIT
+        model      split  accuracy  precision   recall       f1  auc_roc
+Random Forest      train  0.973866   0.990128 0.889359 0.937042 0.996072
+Random Forest validation  0.924105   0.899770 0.734713 0.808907 0.928834
+Random Forest       test  0.929056   0.898117 0.762218 0.824606 0.940604
+      XGBoost      train  0.950245   0.990530 0.779927 0.872703 0.986004
+      XGBoost validation  0.936035   0.964198 0.734713 0.833956 0.946882
+      XGBoost       test  0.941805   0.976801 0.751880 0.849708 0.954197
+Decision Tree      train  0.919395   0.825202 0.801088 0.812967 0.946247
+Decision Tree validation  0.898601   0.771429 0.761994 0.766682 0.914154
+Decision Tree       test  0.905408   0.787619 0.777256 0.782403 0.911732
+
+Recommended by validation ROC-AUC: XGBoost
+
+Bundled models: /Users/sukrit/Desktop/SMT/models/loan_models_bundle.pkl
+Note: This is a validation-based recommendation. Inspect test metrics before deployment.

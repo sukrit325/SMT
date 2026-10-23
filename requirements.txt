@@ -1,0 +1,13 @@
+streamlit
+fastapi
+uvicorn[standard]
+z3-solver
+PyJWT
+pwdlib[argon2]
+requests
+python-dotenv
+scikit-learn 
+pandas 
+numpy 
+joblib
+plotly

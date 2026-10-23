@@ -1,0 +1,42 @@
+2026-10-23 07:36:22,738 | INFO | Starting three-model training pipeline.
+2026-10-23 07:36:22,772 | INFO | Rows loaded: 22690; exact duplicates/invalid targets removed: 0
+2026-10-23 07:36:22,773 | INFO | Target distribution: {0: 17728, 1: 4962}
+2026-10-23 07:36:22,814 | INFO | Split sizes: train=15883 (70%), validation=3403 (15%), test=3404 (15%)
+2026-10-23 07:36:22,815 | INFO | Tuning Random Forest.
+2026-10-23 07:36:28,304 | INFO | RF best parameters: {'classifier__max_depth': 15, 'classifier__min_samples_split': 2, 'classifier__n_estimators': 300}
+2026-10-23 07:36:28,304 | INFO | Tuning XGBoost.
+2026-10-23 07:36:28,794 | INFO | XGBoost best parameters: {'classifier__colsample_bytree': 0.8, 'classifier__learning_rate': 0.1, 'classifier__max_depth': 6, 'classifier__n_estimators': 200, 'classifier__subsample': 0.8}
+2026-10-23 07:36:28,794 | INFO | Training Decision Tree.
+2026-10-23 07:36:28,960 | INFO | {'model': 'Random Forest', 'split': 'train', 'accuracy': 0.9800415538626204, 'precision': 0.9909769757311762, 'recall': 0.9170745752951339, 'f1': 0.952594586511141, 'auc_roc': 0.9985441739696561}
+2026-10-23 07:36:29,023 | INFO | {'model': 'Random Forest', 'split': 'validation', 'accuracy': 0.9285924184543051, 'precision': 0.8883720930232558, 'recall': 0.7701612903225806, 'f1': 0.8250539956803455, 'auc_roc': 0.9389216780502008}
+2026-10-23 07:36:29,084 | INFO | {'model': 'Random Forest', 'split': 'test', 'accuracy': 0.9150998824911868, 'precision': 0.8762376237623762, 'recall': 0.7127516778523489, 'f1': 0.7860843819393042, 'auc_roc': 0.9199744567645403}
+2026-10-23 07:36:29,138 | INFO | {'model': 'XGBoost', 'split': 'train', 'accuracy': 0.9546055531070956, 'precision': 0.9924838940586972, 'recall': 0.7984451482867838, 'f1': 0.8849529280357428, 'auc_roc': 0.9911197303568706}
+2026-10-23 07:36:29,154 | INFO | {'model': 'XGBoost', 'split': 'validation', 'accuracy': 0.9426976197472818, 'precision': 0.9773913043478261, 'recall': 0.7553763440860215, 'f1': 0.8521607278241091, 'auc_roc': 0.9534437718117006}
+2026-10-23 07:36:29,170 | INFO | {'model': 'XGBoost', 'split': 'test', 'accuracy': 0.9256756756756757, 'precision': 0.9522058823529411, 'recall': 0.6953020134228188, 'f1': 0.8037238169123352, 'auc_roc': 0.9361828007198548}
+2026-10-23 07:36:29,192 | INFO | {'model': 'Decision Tree', 'split': 'train', 'accuracy': 0.9118554429263993, 'precision': 0.7886382623224728, 'recall': 0.8154333429311834, 'f1': 0.8018120045300113, 'auc_roc': 0.9507210452545978}
+2026-10-23 07:36:29,201 | INFO | {'model': 'Decision Tree', 'split': 'validation', 'accuracy': 0.8912724066999707, 'precision': 0.7269417475728155, 'recall': 0.8051075268817204, 'f1': 0.764030612244898, 'auc_roc': 0.9245878776482387}
+2026-10-23 07:36:29,211 | INFO | {'model': 'Decision Tree', 'split': 'test', 'accuracy': 0.8842538190364277, 'precision': 0.7247119078104993, 'recall': 0.7597315436241611, 'f1': 0.7418086500655308, 'auc_roc': 0.9036012933155979}
+2026-10-23 07:36:29,229 | INFO | Bundle saved: /Users/sukrit/Desktop/SMT/models/loan_models_bundle.pkl
+2026-10-23 07:36:29,229 | INFO | Report saved: /Users/sukrit/Desktop/SMT/output/training_report.txt
+2026-10-23 07:36:29,229 | INFO | Training pipeline completed successfully.
+2026-10-23 07:57:20,165 | INFO | Starting three-model training pipeline.
+2026-10-23 07:57:20,197 | INFO | Rows loaded: 32581; exact duplicates/invalid targets removed: 165
+2026-10-23 07:57:20,197 | INFO | Target distribution: {0: 25327, 1: 7089}
+2026-10-23 07:57:20,248 | INFO | Split sizes: train=22691 (70%), validation=4862 (15%), test=4863 (15%)
+2026-10-23 07:57:20,249 | INFO | Tuning Random Forest.
+2026-10-23 07:57:27,393 | INFO | RF best parameters: {'classifier__max_depth': 15, 'classifier__min_samples_split': 2, 'classifier__n_estimators': 300}
+2026-10-23 07:57:27,393 | INFO | Tuning XGBoost.
+2026-10-23 07:57:28,062 | INFO | XGBoost best parameters: {'classifier__colsample_bytree': 0.8, 'classifier__learning_rate': 0.1, 'classifier__max_depth': 6, 'classifier__n_estimators': 200, 'classifier__subsample': 0.8}
+2026-10-23 07:57:28,062 | INFO | Training Decision Tree.
+2026-10-23 07:57:28,273 | INFO | {'model': 'Random Forest', 'split': 'train', 'accuracy': 0.9738662905997972, 'precision': 0.9901278887143818, 'recall': 0.8893591293833132, 'f1': 0.937042148848073, 'auc_roc': 0.9960723666939643}
+2026-10-23 07:57:28,358 | INFO | {'model': 'Random Forest', 'split': 'validation', 'accuracy': 0.9241053064582476, 'precision': 0.8997695852534562, 'recall': 0.7347130761994356, 'f1': 0.8089073019161056, 'auc_roc': 0.9288338244183187}
+2026-10-23 07:57:28,421 | INFO | {'model': 'Random Forest', 'split': 'test', 'accuracy': 0.9290561381863047, 'precision': 0.8981173864894795, 'recall': 0.7622180451127819, 'f1': 0.8246059989832232, 'auc_roc': 0.9406036808261771}
+2026-10-23 07:57:28,502 | INFO | {'model': 'XGBoost', 'split': 'train', 'accuracy': 0.9502445903662244, 'precision': 0.9905298182748912, 'recall': 0.7799274486094316, 'f1': 0.8727026722291127, 'auc_roc': 0.9860035485664882}
+2026-10-23 07:57:28,524 | INFO | {'model': 'XGBoost', 'split': 'validation', 'accuracy': 0.9360345536816125, 'precision': 0.9641975308641976, 'recall': 0.7347130761994356, 'f1': 0.8339562199679659, 'auc_roc': 0.9468818476516447}
+2026-10-23 07:57:28,546 | INFO | {'model': 'XGBoost', 'split': 'test', 'accuracy': 0.941805469874563, 'precision': 0.9768009768009768, 'recall': 0.7518796992481203, 'f1': 0.849707912904939, 'auc_roc': 0.9541969889187302}
+2026-10-23 07:57:28,576 | INFO | {'model': 'Decision Tree', 'split': 'train', 'accuracy': 0.9193953549865586, 'precision': 0.8252024081378452, 'recall': 0.8010882708585247, 'f1': 0.8129665609980571, 'auc_roc': 0.9462470475313437}
+2026-10-23 07:57:28,588 | INFO | {'model': 'Decision Tree', 'split': 'validation', 'accuracy': 0.8986013986013986, 'precision': 0.7714285714285715, 'recall': 0.761994355597366, 'f1': 0.7666824420255561, 'auc_roc': 0.9141536479001133}
+2026-10-23 07:57:28,600 | INFO | {'model': 'Decision Tree', 'split': 'test', 'accuracy': 0.9054081842484063, 'precision': 0.7876190476190477, 'recall': 0.7772556390977443, 'f1': 0.78240302743614, 'auc_roc': 0.9117318170393078}
+2026-10-23 07:57:28,619 | INFO | Bundle saved: /Users/sukrit/Desktop/SMT/models/loan_models_bundle.pkl
+2026-10-23 07:57:28,619 | INFO | Report saved: /Users/sukrit/Desktop/SMT/output/training_report.txt
+2026-10-23 07:57:28,619 | INFO | Training pipeline completed successfully.
