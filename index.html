@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Python App UI</title>
+    <style>
+        body { font-family: sans-serif; padding: 40px; text-align: center; }
+        button { padding: 10px 20px; font-size: 16px; cursor: pointer; }
+        #result { margin-top: 20px; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <h1>My Project Dashboard</h1>
+    <button id="getDataBtn">Fetch Data from Python API</button>
+    <div id="result"></div>
+
+    <script>
+        // Replace with your live cloud backend URL where app.py is running
+        const BACKEND_URL = "https://your-python-backend-url.com";
+
+        document.getElementById('getDataBtn').addEventListener('click', async () => {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerText = "Loading...";
+            
+            try {
+                const response = await fetch(BACKEND_URL);
+                const data = await response.json();
+                resultDiv.innerText = data.message || JSON.stringify(data);
+            } catch (error) {
+                resultDiv.innerText = "Error connecting to Python backend.";
+                console.error(error);
+            }
+        });
+    </script>
+</body>
+</html>
