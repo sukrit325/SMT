@@ -26,5 +26,5 @@ Decision Tree       test  0.905408   0.787619 0.777256 0.782403 0.911732
 
 Recommended by validation ROC-AUC: XGBoost
 
-Bundled models: /Users/sukrit/Desktop/SMT/models/loan_models_bundle.pkl
+Bundled models: /Users/sukrit/Desktop/SMT/models/combined_models.pkl
 Note: This is a validation-based recommendation. Inspect test metrics before deployment.

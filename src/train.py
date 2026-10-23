@@ -30,7 +30,7 @@ DATA_PATH = BASE / "borrowers.csv"
 MODEL_DIR = BASE / "models"
 OUTPUT_DIR = BASE / "output"
 
-BUNDLE_PATH = MODEL_DIR / "loan_models_bundle.pkl"
+BUNDLE_PATH = MODEL_DIR / "combined_models.pkl"
 REPORT_PATH = OUTPUT_DIR / "training_report.txt"
 
 TARGET = "loan_status"

@@ -738,12 +738,8 @@ elif main_tab == "🧠 Logic Lab":
                     st.markdown(f"- {e}")
                 st.session_state.logic_result = None
             else:
-                from app import parse_formula, local_solve   # or import from your logic_lab module
-                terms, errors = parse_formula(formula_text)
-                if errors:
-                    backend = {"status": "UNKNOWN", "reason": "; ".join(errors), "model": []}
-                else:
-                    backend = local_solve(terms, borrower)
+                # Use the parser and local solver defined in this page.
+                backend = local_solve(terms, borrower)
                 if backend and isinstance(backend, dict) and "status" in backend:
                     result = {
                         "status": backend.get("status", "UNKNOWN"),
