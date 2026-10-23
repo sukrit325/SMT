@@ -36,8 +36,8 @@ def check_policies(b: Borrower) -> dict:
         b.monthly_income - b.family_expenses - b.existing_emi - b.monthly_savings
     )
     rules["Proposed EMI within available surplus"] = (
-        b.propsed_emi >= 0
-        and b.propsed_emi <= available_surplus
+        b.proposed_emi >= 0
+        and b.proposed_emi <= available_surplus
     )
     return {
         "rules": rules,

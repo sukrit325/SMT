@@ -1,26 +1,57 @@
-
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 from src.policy import Borrower, check_policies
 from src.verifier import verify_policy
 from typing import Any
 import logging
+import pickle
+import os
+from pathlib import Path
 
-# Enable backend logging
+import numpy as np
+import pandas as pd
+
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s | %(levelname)s | %(message)s",
 )
 logger = logging.getLogger(__name__)
 
+BASE_DIR = Path(__file__).resolve().parent
+MODEL_PATH = Path(os.getenv("MODEL_PATH", BASE_DIR / "models" / "combined_models.pkl"))
 
-app = FastAPI(
-    title="LendVerify API",
-    description="Lending policy assessment and Z3 verification",
-    version="1.0.0",
+app = FastAPI(title="LendVerify API", version="1.0.0")
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
-# ... (rest of file remains the same)
+# ---- Load model bundle once at startup ----
+_bundle: dict | None = None
+
+@app.on_event("startup")
+def _startup():
+    global _bundle
+    if MODEL_PATH.exists():
+        with open(MODEL_PATH, "rb") as f:
+            _bundle = pickle.load(f)
+        logger.info("Loaded model bundle from %s", MODEL_PATH)
+    else:
+        logger.warning("Model bundle not found at %s; /ml/predict will fail.", MODEL_PATH)
+
+def _models() -> dict:
+    if not _bundle:
+        raise HTTPException(status_code=503, detail="Models not loaded")
+    return _bundle.get("models", {})
+
+def _feature_columns() -> list[str]:
+    if not _bundle:
+        raise HTTPException(status_code=503, detail="Models not loaded")
+    return list(_bundle.get("feature_columns", []))
+
 
 class AssessmentRequest(BaseModel):
     profitable_fy1: bool
@@ -40,24 +71,25 @@ class AssessmentRequest(BaseModel):
 class VerificationRequest(BaseModel):
     defect: str | None = None
 
+
 class PredictionRequest(BaseModel):
     features: dict[str, Any]
 
+
 @app.get("/api/v1/health")
 def health():
-    logger.info("Health check requested")
     return {
         "status": "ok",
         "service": "lendverify-api",
+        "models_loaded": bool(_bundle),
+        "models": list(_models().keys()) if _bundle else [],
     }
 
 
 @app.post("/api/v1/assess")
 def assess_borrower(request: AssessmentRequest):
-    logger.info("Assessment request: %s", request.model_dump())
     borrower = Borrower(**request.model_dump())
     result = check_policies(borrower)
-
     return {
         "rules": result["rules"],
         "available_surplus": result["available_surplus"],
@@ -65,78 +97,48 @@ def assess_borrower(request: AssessmentRequest):
     }
 
 
-@app.get("/api/v1/ml/status")
-def ml_status():
-    logger.info("ML status requested")
-    return {
-        "status": "available",
-        "note": "Models must be trained first using src/train.py",
-        "training_command": "python src/train.py"
-    }
-
-
-@app.post("/api/v1/ml/train")
-def ml_train():
-    logger.info("ML training started - running src.train.main()...")
+@app.post("/api/v1/verify")
+def verify_lending_policy(request: VerificationRequest):
     try:
-        # Import and run the available training pipeline
-        from src import train as train_module
-        train_module.main()
-        return {
-            "status": "completed",
-            "message": "Models trained successfully",
-            "note": "Check /output/training.log for details"
-        }
-    except Exception as e:
-        logger.error("Training failed: %s", str(e))
-        raise HTTPException(status_code=500, detail=str(e))
+        return verify_policy(request.defect)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    except Exception as exc:
+        logger.exception("Verification failed")
+        raise HTTPException(status_code=500, detail="Verification engine failed") from exc
 
 
 @app.post("/api/v1/ml/predict")
 def predict_borrower_endpoint(request: PredictionRequest):
-    logger.info("Prediction request received with features")
-    # Note: This endpoint returns a placeholder response
-    # The actual prediction would require loading trained models from src/train.py bundle
-    return {
-        "status": "unavailable",
-        "message": "This is a demo endpoint. For real predictions, train models using /ml/train first.",
-        "note": "The training pipeline creates a bundled model that can be loaded for predictions."
-    }
-
-
-@app.post("/api/v1/ml/evaluate-test")
-def evaluate_test_endpoint():
-    logger.info("Test evaluation requested")
-    # Note: This endpoint returns a placeholder response
-    return {
-        "status": "unavailable",
-        "message": "This is a demo endpoint. Evaluation would require loaded trained models."
-    }
-
-
-@app.post("/api/v1/verify")
-def verify_lending_policy(request: VerificationRequest):
-    logger.info("Verification request: defect=%s", request.defect)
+    models = _models()
+    cols = _feature_columns()
     try:
-        return verify_policy(request.defect)
-    except ValueError as exc:
-        logger.error("Verification failed (ValueError): %s", str(exc))
-        raise HTTPException(status_code=400, detail=str(exc)) from exc
-    except Exception as exc:
-        logger.error("Verification failed (Unexpected): %s", str(exc))
-        raise HTTPException(
-            status_code=500,
-            detail="Verification engine failed",
-        ) from exc
+        X = pd.DataFrame([request.features])[cols]
+    except KeyError as exc:
+        raise HTTPException(status_code=400, detail=f"Missing feature: {exc}") from exc
 
+    predictions, probabilities = {}, {}
+    for name, model in models.items():
+        try:
+            predictions[name] = int(model.predict(X)[0])
+            if hasattr(model, "predict_proba"):
+                proba = model.predict_proba(X)[0]
+                classes = list(getattr(model, "classes_", []))
+                probabilities[name] = {
+                    str(cls): float(p) for cls, p in zip(classes, proba)
+                }
+        except Exception as exc:
+            logger.exception("Model %s failed", name)
+            predictions[name] = None
+            probabilities[name] = {"error": str(exc)}
 
-if __name__ == "__main__":
-    import uvicorn
-
-    logger.info("Starting LendVerify API on http://127.0.0.1:8000")
-    uvicorn.run(
-        app,
-        host="127.0.0.1",
-        port=8000,
-        reload=False,
-    )
+    # Backward-compatible singular fields (first model)
+    first = next(iter(models)) if models else None
+    return {
+        "prediction": predictions.get(first),
+        "class_probabilities": probabilities.get(first),
+        "all_predictions": predictions,
+        "all_probabilities": probabilities,
+        "surrogate_prediction": predictions.get(first),
+        "surrogate_path": [],   # fill in if you have a surrogate
+    }

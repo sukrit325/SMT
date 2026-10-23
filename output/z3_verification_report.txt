@@ -1,7 +1,7 @@
 MODEL PREDICTION + Z3 POLICY VERIFICATION
 ==============================================================================
-Generated: 2026-10-23T16:07:06.451914
-Dataset: /Users/sukrit/Downloads/SMT/borrowers.csv
+Generated: 2026-10-23T17:05:04.732750
+Dataset: /Users/sukrit/Documents/GitHub/SMT/borrowers.csv
 Rows evaluated: 32581
 
 IMPORTANT: Policy thresholds are illustrative, not approved lending policy.

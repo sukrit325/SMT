@@ -137,7 +137,7 @@ def z3_check(name, conditions):
 
 
 def verify_policy(row):
-    results = {}
+    results = [str, str] = {}
     
     try:
         age = Real("age")

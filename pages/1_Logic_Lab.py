@@ -12,7 +12,7 @@ from app import metric_card
 # ---------------------------------------------------------------------
 # Config
 # ---------------------------------------------------------------------
-API = "http://127.0.0.1:8000/api/v1"
+# API = "http://127.0.0.1:8000/api/v1"
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -83,28 +83,28 @@ for key, default in [
     st.session_state.setdefault(key, default)
 
 
-# ---------------------------------------------------------------------
-# Optional backend helper
-# ---------------------------------------------------------------------
-def api_request(method, endpoint, **kwargs):
-    try:
-        r = requests.request(method=method, url=f"{API}{endpoint}", timeout=8, **kwargs)
-        r.raise_for_status()
-        return r.json()
-    except requests.exceptions.ConnectionError:
-        return None
-    except requests.exceptions.Timeout:
-        return None
-    except requests.exceptions.HTTPError as exc:
-        try:
-            detail = r.json().get("detail", str(exc))
-        except Exception:
-            detail = str(exc)
-        st.warning(f"Backend returned an error: {detail}")
-        return None
-    except requests.exceptions.RequestException as exc:
-        st.warning(f"Request failed: {exc}")
-        return None
+# # ---------------------------------------------------------------------
+# # Optional backend helper
+# # ---------------------------------------------------------------------
+# def api_request(method, endpoint, **kwargs):
+#     try:
+#         r = requests.request(method=method, url=f"{API}{endpoint}", timeout=8, **kwargs)
+#         r.raise_for_status()
+#         return r.json()
+#     except requests.exceptions.ConnectionError:
+#         return None
+#     except requests.exceptions.Timeout:
+#         return None
+#     except requests.exceptions.HTTPError as exc:
+#         try:
+#             detail = r.json().get("detail", str(exc))
+#         except Exception:
+#             detail = str(exc)
+#         st.warning(f"Backend returned an error: {detail}")
+#         return None
+#     except requests.exceptions.RequestException as exc:
+#         st.warning(f"Request failed: {exc}")
+#         return None
 
 
 # =====================================================================
@@ -576,7 +576,14 @@ if main_tab == "🏦 Borrower & Verification":
             "family_expenses": family,
             "proposed_emi": proposed_emi,
         }
-        backend = api_request("POST", "/assess", json=payload)
+
+        b = Borrower(**payload)
+        rules = check_policies(b)
+        backend = {
+            "rules": rules["rules"],
+            "available_surplus": rules["available_surplus"],
+            "compliant": rules["compliant"],
+        }
 
         if backend:
             surplus = backend["available_surplus"]
@@ -637,8 +644,7 @@ if main_tab == "🏦 Borrower & Verification":
 
     if st.button("Run Z3 verification", type="primary"):
         selected_defect = defect_map[defect]
-        backend = api_request("POST", "/verify", json={"defect": selected_defect})
-
+        backend = verify_policy(selected_defect)
         if backend and "status" in backend:
             result = backend
             source = "backend"
@@ -732,10 +738,12 @@ elif main_tab == "🧠 Logic Lab":
                     st.markdown(f"- {e}")
                 st.session_state.logic_result = None
             else:
-                backend = api_request(
-                    "POST", "/logic/verify",
-                    json={"formula": formula_text, "borrower": borrower},
-                )
+                from app import parse_formula, local_solve   # or import from your logic_lab module
+                terms, errors = parse_formula(formula_text)
+                if errors:
+                    backend = {"status": "UNKNOWN", "reason": "; ".join(errors), "model": []}
+                else:
+                    backend = local_solve(terms, borrower)
                 if backend and isinstance(backend, dict) and "status" in backend:
                     result = {
                         "status": backend.get("status", "UNKNOWN"),
@@ -884,20 +892,39 @@ else:
         )
         predict = st.form_submit_button("Predict", type="primary")
 
-    if predict:
-        backend = api_request("POST", "/ml/predict", json={"features": values})
-        if backend:
-            st.metric("Predicted class", backend["prediction"])
-            st.write("Class probabilities")
-            st.json(backend["class_probabilities"])
-            st.write("Surrogate prediction:", backend["surrogate_prediction"])
-            st.write("Surrogate decision path")
-            st.json(backend["surrogate_path"])
-        else:
-            st.warning(
-                "Backend not reachable. Start it with `python main.py` to run the saved "
-                "ML bundle. The other tabs work fully offline."
-            )
+        import pickle
+    from pathlib import Path
+    import pandas as pd
+
+    _MODEL_CACHE = None
+    def _load_bundle():
+        global _MODEL_CACHE
+        if _MODEL_CACHE is None:
+            path = Path(__file__).parent.parent / "models" / "combined_models.pkl"
+            with open(path, "rb") as f:
+                _MODEL_CACHE = pickle.load(f)
+        return _MODEL_CACHE
+
+    bundle = _load_bundle()
+    models = bundle["models"]
+    cols = bundle["feature_columns"]
+    X = pd.DataFrame([values])[cols]
+
+    predictions = {name: int(m.predict(X)[0]) for name, m in models.items()}
+    probs = {
+        name: [float(p) for p in m.predict_proba(X)[0]]
+        for name, m in models.items() if hasattr(m, "predict_proba")
+    }
+
+    first = next(iter(models))
+    backend = {
+        "prediction": predictions[first],
+        "class_probabilities": probs.get(first, []),
+        "all_predictions": predictions,
+        "all_probabilities": probs,
+        "surrogate_prediction": predictions[first],
+        "surrogate_path": [],
+    }
 
 st.divider()
 st.caption(
