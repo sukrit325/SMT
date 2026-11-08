@@ -1,7 +1,9 @@
 import json
 import logging
+import pickle
 import re
 from datetime import datetime
+from pathlib import Path
 
 import pandas as pd
 import requests
@@ -579,32 +581,9 @@ if main_tab == "🏦 Borrower & Verification":
 
         b = Borrower(**payload)
         rules = check_policies(b)
-        backend = {
-            "rules": rules["rules"],
-            "available_surplus": rules["available_surplus"],
-            "compliant": rules["compliant"],
-        }
-
-        if backend:
-            surplus = backend["available_surplus"]
-            rules = backend["rules"]
-            compliant = backend["compliant"]
-            source = "backend"
-        else:
-            b = Borrower(
-                profitable_fy1=fy1, profitable_fy2=fy2,
-                bank_credits=bank_credits, turnover=turnover,
-                repayment_bounces=int(bounces),
-                bounces_cleared_within_3_days=cleared_fast,
-                deviation_approved=deviation,
-                monthly_income=income, existing_emi=existing_emi,
-                monthly_savings=savings, family_expenses=family,
-                proposed_emi=proposed_emi,
-            )
-            surplus = b.available_surplus()
-            rules = check_policies(b)
-            compliant = all(rules.values())
-            source = "local"
+        surplus = b.available_surplus()
+        compliant = all(rules.values())
+        source = "local"
         with st.container(border=True):
             k1, k2, k3 = st.columns(3, gap="medium")
             with k1:
@@ -888,39 +867,38 @@ else:
         )
         predict = st.form_submit_button("Predict", type="primary")
 
-        import pickle
-    from pathlib import Path
-    import pandas as pd
-
-    _MODEL_CACHE = None
-    def _load_bundle():
-        global _MODEL_CACHE
-        if _MODEL_CACHE is None:
+    if predict:
+        try:
             path = Path(__file__).parent.parent / "models" / "combined_models.pkl"
-            with open(path, "rb") as f:
-                _MODEL_CACHE = pickle.load(f)
-        return _MODEL_CACHE
+            with path.open("rb") as f:
+                bundle = pickle.load(f)
+            models = bundle["models"]
+            cols = bundle["feature_columns"]
+            X = pd.DataFrame([values])[cols]
 
-    bundle = _load_bundle()
-    models = bundle["models"]
-    cols = bundle["feature_columns"]
-    X = pd.DataFrame([values])[cols]
+            predictions = {name: int(model.predict(X)[0]) for name, model in models.items()}
+            probs = {
+                name: [float(probability) for probability in model.predict_proba(X)[0]]
+                for name, model in models.items()
+                if hasattr(model, "predict_proba")
+            }
 
-    predictions = {name: int(m.predict(X)[0]) for name, m in models.items()}
-    probs = {
-        name: [float(p) for p in m.predict_proba(X)[0]]
-        for name, m in models.items() if hasattr(m, "predict_proba")
-    }
-
-    first = next(iter(models))
-    backend = {
-        "prediction": predictions[first],
-        "class_probabilities": probs.get(first, []),
-        "all_predictions": predictions,
-        "all_probabilities": probs,
-        "surrogate_prediction": predictions[first],
-        "surrogate_path": [],
-    }
+            first = next(iter(models))
+            prediction = predictions[first]
+            approved = prediction == 0
+            if approved:
+                st.success("Prediction: likely eligible (low predicted default risk)")
+            else:
+                st.warning("Prediction: high predicted default risk")
+            st.caption(
+                "The trained target is `loan_status`: 0 = no default, 1 = default risk."
+            )
+            st.write("Model predictions", predictions)
+            if first in probs:
+                st.write("Class probabilities", probs[first])
+        except (KeyError, OSError, pickle.PickleError, ValueError) as exc:
+            logger.exception("Borrower prediction failed")
+            st.error(f"Prediction failed: {exc}")
 
 st.divider()
 st.caption(

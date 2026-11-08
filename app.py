@@ -1013,95 +1013,6 @@ elif page == "Z3 Verification":
             elif page == "Parameter Analysis":
                 st.subheader("Parameter analysis")
 
-z3_df = ensure_z3()
-if z3_df is None or z3_df.empty:
-    st.info("Run **Z3 verification** first to generate compliance labels.")
-elif df is None:
-    st.error("Borrower dataset is unavailable.")
-else:
-    # No borrower ID in dataset -> join positionally.
-    # run_z3_verification builds results_df with df.index, so order matches.
-    if len(z3_df) != len(df):
-        st.warning(
-            f"Row counts differ (dataset {len(df)} vs Z3 {len(z3_df)}). "
-            "Re-run Z3 verification after loading the current dataset."
-        )
-    else:
-        merged = df.copy()
-        merged["Compliance"] = z3_df["All policies passed"].to_numpy()
-
-        # ... rest of Parameter Analysis rendering
-        a, b, c = st.columns(3)
-        a.metric("Matched borrowers", len(merged))
-        b.metric("Compliant", int(merged["Compliance"].sum()))
-        c.metric("Non-compliant", int((~merged["Compliance"]).sum()))
-
-        a, b, c = st.columns(3)
-        a.metric("Matched borrowers", len(merged))
-        b.metric("Compliant", int(merged["Compliance"].sum()))
-        c.metric("Non-compliant", int((~merged["Compliance"]).sum()))
-
-        id_like = {"id", "borrower_id", "customer_id", "record_id", "index", "borrower"}
-        numeric_cols = [
-            col for col in merged.select_dtypes(include=np.number).columns
-            if col != "Compliance" and str(col).lower() not in id_like
-        ]
-
-        if numeric_cols:
-            st.markdown("### Compliance by parameter")
-            rows = []
-            for col in numeric_cols:
-                good = merged.loc[merged["Compliance"], col].dropna()
-                bad = merged.loc[~merged["Compliance"], col].dropna()
-                if len(good) and len(bad):
-                    pooled = np.sqrt((good.var(ddof=1) + bad.var(ddof=1)) / 2) if len(good) > 1 and len(bad) > 1 else np.nan
-                    gap = abs(good.mean() - bad.mean())
-                    std_gap = gap / pooled if pooled and not np.isnan(pooled) and pooled > 0 else np.nan
-                    rows.append({
-                        "Parameter": col,
-                        "Compliant mean": round(good.mean(), 4),
-                        "Non-compliant mean": round(bad.mean(), 4),
-                        "Standardized gap": round(std_gap, 3) if not np.isnan(std_gap) else None,
-                    })
-        if rows:
-            vdf = pd.DataFrame(rows).sort_values(
-                "Standardized gap", ascending=False, na_position="last"
-            )
-            st.dataframe(vdf, use_container_width=True)
-            fig = px.bar(
-                vdf.head(15).dropna(subset=["Standardized gap"]).sort_values("Standardized gap"),
-                x="Standardized gap", y="Parameter", orientation="h",
-                color="Standardized gap", color_continuous_scale="Blues",
-            )
-            fig.update_layout(
-                height=max(350, 26 * min(15, len(vdf))),
-                coloraxis_showscale=False,
-                margin=dict(l=10, r=10, t=20, b=10),
-            )
-            st.plotly_chart(fig, use_container_width=True)
-
-            feature = st.selectbox("Distribution of a parameter", numeric_cols)
-            fig = go.Figure()
-            for label, name, color in [(True, "Compliant", "#10b981"), (False, "Non-compliant", "#ef4444")]:
-                vals = merged.loc[merged["Compliance"] == label, feature].dropna()
-                fig.add_trace(go.Histogram(x=vals, name=name, opacity=0.65, nbinsx=30, marker_color=color))
-            fig.update_layout(barmode="overlay", height=400, xaxis_title=feature, yaxis_title="Borrower count", margin=dict(l=10, r=10, t=20, b=10))
-            st.plotly_chart(fig, use_container_width=True)
-        else:
-            st.info("No numeric borrower parameters found.")
-
-            st.markdown("### Legal-review queue")
-            flagged = merged.loc[~merged["Compliance"]]
-            if len(flagged):
-                st.warning(f"{len(flagged)} non-compliant borrower(s) require review.")
-                st.dataframe(flagged, use_container_width=True, hide_index=True)
-                st.download_button(
-                    "⬇ Export legal-review queue",
-                    flagged.to_csv(index=False).encode("utf-8"),
-                    file_name="lendverify_legal_review.csv", mime="text/csv",
-                )
-            else:
-                st.success("No non-compliant borrowers in the matched set.")
     z3_df = ensure_z3()
     if df is None:
         st.error("Borrower dataset is unavailable.")
@@ -1115,17 +1026,36 @@ else:
              if any(k in str(c).lower() for k in ("borrower_id", "customer_id", "record_id", "borrower", "id"))),
             None,
         )
-        if not z3_id or not df_id:
+        if not z3_id:
             st.warning(f"Cannot join: z3 has Borrower column={bool(z3_id)}, dataset ID={df_id}. "
                        f"Dataset columns: {list(df.columns)}")
+        elif not df_id and len(df) != len(z3_df):
+            st.warning(
+                "Cannot align Z3 results: the dataset has no borrower ID and its row count "
+                f"({len(df)}) differs from the Z3 results ({len(z3_df)}). "
+                "Re-run Z3 verification after loading the current dataset."
+            )
         else:
             df_join = df.copy()
+            if not df_id:
+                # The Z3 result is generated from this dataset in the same row order.
+                df_id = "__lendverify_row_id"
+                df_join[df_id] = np.arange(len(df_join))
+                z3_df = z3_df.copy()
+                z3_df[df_id] = np.arange(len(z3_df))
             df_join[df_id] = df_join[df_id].astype(str).str.strip()
             z = z3_df[["Borrower", "All policies passed"]].copy()
+            if df_id in z3_df:
+                z[df_id] = z3_df[df_id].astype(str).str.strip()
             z["Borrower"] = z["Borrower"].astype(str).str.strip()
             z = z.rename(columns={"All policies passed": "Compliance"})
 
-            merged = df_join.merge(z, left_on=df_id, right_on="Borrower", how="inner")
+            merged = df_join.merge(
+                z,
+                left_on=df_id,
+                right_on=df_id if df_id in z else "Borrower",
+                how="inner",
+            )
 
             if merged.empty:
                 st.warning("Join produced no rows — borrower IDs don't overlap. "
