@@ -1,104 +1,100 @@
 
+import math
 from z3 import *
 from policy import Borrower
 
 
-def verify_with_z3(b: Borrower):
+class LendVerifyEngine:
 
-    solver = Solver()
+    def __init__(self):
+        self.solver = Solver()
 
-    # 1. Declare financial variables
-    I = Real('I')
-    E = Real('E')
-    D = Real('D')
-    S = Real('S')
-    P = Real('P')
-    C = Real('C')
-    T = Real('T')
+        # Declare variables only once
+        self.Age = Int("Age")
+        self.Income = Real("Income")
+        self.Employment = Real("Employment")
+        self.LoanAmount = Real("LoanAmount")
+        self.Rate = Real("Rate")
+        self.LoanRatio = Real("LoanRatio")
 
-    Age = Int('Age')
-    Rate = Real('Rate')
+    def verify(self, b: Borrower):
 
-    # 2. Assign borrower values
-    solver.add(I == RealVal(str(b.monthly_income)))
-    solver.add(E == RealVal(str(b.family_expenses)))
-    solver.add(D == RealVal(str(b.existing_emi)))
-    solver.add(S == RealVal(str(b.monthly_savings)))
-    solver.add(P == RealVal(str(b.proposed_emi)))
-    solver.add(C == RealVal(str(b.bank_credits)))
-    solver.add(T == RealVal(str(b.turnover)))
-
-    solver.add(Age == b.person_age)
-    solver.add(Rate == RealVal(str(b.loan_int_rate)))
-
-    # 3. Policy 1: Repayment surplus
-    surplus = I - E - D - S
-
-    solver.assert_and_track(
-        And(P >= 0, P <= surplus),
-        "repayment_surplus"
-    )
-
-    # 4. Policy 2: Business profitability
-    solver.assert_and_track(
-        BoolVal(b.profitable_fy1 and b.profitable_fy2),
-        "business_profitability"
-    )
-
-    # 5. Policy 3: Bank credit verification
-    solver.assert_and_track(
-        C >= T,
-        "bank_credit_verification"
-    )
-
-    # 6. Policy 4: Repayment history
-    repayment_history = Or(
-        b.repayment_bounces == 0,
-        And(
-            b.repayment_bounces > 0,
-            b.repayment_bounces <= 2,
-            b.bounces_cleared_within_3_days,
-            b.deviation_approved
-        )
-    )
-
-    solver.assert_and_track(
-        BoolVal(repayment_history),
-        "repayment_history"
-    )
-
-    # 7. Policy 5: Age eligibility
-    solver.assert_and_track(
-        And(Age >= 18, Age <= 100),
-        "age_eligibility"
-    )
-
-    # 8. Policy 6: Interest rate verification
-    solver.assert_and_track(
-        And(Rate >= 5.0, Rate <= 25.0),
-        "interest_rate"
-    )
-
-    # 9. Evaluate constraints
-    result = solver.check()
-
-    if result == sat:
-        return "SAT", "Compliant"
-
-    elif result == unsat:
-
-        unsat_core = [
-            str(constraint)
-            for constraint in solver.unsat_core()
+        values = [
+            b.person_age,
+            b.person_income,
+            b.person_emp_length,
+            b.loan_amnt,
+            b.loan_int_rate,
+            b.loan_percent_income
         ]
 
-        return (
-            "UNSAT",
-            {
-                "message": "Borrower violates lending policies",
-                "violated_constraints": unsat_core
-            }
-        )
+        # Reject missing or invalid values
+        try:
+            if any(
+                v is None or not math.isfinite(float(v))
+                for v in values
+            ):
+                return "UNKNOWN", "Missing or invalid input"
 
-    else:
-        return "UNKNOWN", solver.reason_unknown()
+            if float(b.person_age) != int(b.person_age):
+                return "UNKNOWN", "Invalid age"
+
+        except (TypeError, ValueError):
+            return "UNKNOWN", "Invalid input"
+
+        s = self.solver
+
+        # Isolate each borrower's constraints
+        s.push()
+
+        try:
+            # Assign current borrower values
+            s.add(self.Age == IntVal(int(b.person_age)))
+            s.add(self.Income == RealVal(str(float(b.person_income))))
+            s.add(self.Employment == RealVal(str(float(b.person_emp_length))))
+            s.add(self.LoanAmount == RealVal(str(float(b.loan_amnt))))
+            s.add(self.Rate == RealVal(str(float(b.loan_int_rate))))
+            s.add(self.LoanRatio == RealVal(str(float(b.loan_percent_income))))
+
+            # Six tracked policies
+            policies = [
+                (And(self.Age >= 18, self.Age <= 100),
+                 "age_eligibility"),
+
+                (And(self.Employment >= 0, self.Employment <= 60),
+                 "employment_history_bounds"),
+
+                (self.Income > 0,
+                 "positive_annual_income"),
+
+                (self.LoanAmount > 0,
+                 "positive_loan_amount"),
+
+                (And(self.Rate >= 5, self.Rate <= 25),
+                 "interest_rate_bounds"),
+
+                (And(self.LoanRatio > 0, self.LoanRatio <= 0.50),
+                 "loan_income_ratio_limit")
+            ]
+
+            for condition, name in policies:
+                s.assert_and_track(condition, Bool(name))
+
+            result = s.check()
+
+            if result == sat:
+                return "SAT", "All six policies satisfied"
+
+            if result == unsat:
+                core = [str(x) for x in s.unsat_core()]
+
+                return "UNSAT", {
+                    "message": "Policy violations detected",
+                    "violated_constraints": core
+                }
+
+            return "UNKNOWN", s.reason_unknown()
+
+        finally:
+            # Remove current borrower's constraints
+            s.pop()

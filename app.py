@@ -1,10 +1,14 @@
 from __future__ import annotations
 
+import hashlib
+import inspect
 import io
 import logging
+import math
 import pickle
 import re
 import time
+from collections import Counter
 from datetime import datetime
 from decimal import Decimal, InvalidOperation
 from pathlib import Path
@@ -23,10 +27,21 @@ from sklearn.model_selection import train_test_split
 from sklearn.tree import DecisionTreeClassifier, export_text
 
 try:
-    from z3 import And, Real, RealVal, Solver, sat, unsat, Z3Exception
+    from z3 import (
+        And,
+        Real,
+        RealVal,
+        Solver,
+        Z3Exception,
+        get_version_string,
+        sat,
+        unsat,
+    )
     Z3_AVAILABLE = True
-except ImportError:
+    Z3_IMPORT_ERROR = None
+except ImportError as exc:
     Z3_AVAILABLE = False
+    Z3_IMPORT_ERROR = str(exc)
 pd.set_option("styler.render.max_elements", 1_000_000)
 # ---------------------------------------------------------------------
 # LendVerify — Result-first loan verification dashboard
@@ -368,71 +383,339 @@ def run_pipeline(df: pd.DataFrame, models: dict, target: str, test_size: float, 
     }
 
 
+
 # ====================== BUILT-IN Z3 VERIFICATION ========================
-# No separate z3_verification.py required. Runs the 6 policies per borrower
-# and returns a structured DataFrame used by every page.
+# No separate z3_verification.py required. Runs the 6 illustrative policies
+# independently per borrower and returns a structured DataFrame + audit text.
 
-def _z3_check(name: str, conditions) -> str:
+POLICY_DEFINITIONS = {
+    "adult_eligibility": "person_age >= 18",
+    "positive_income_and_loan": "person_income > 0 AND loan_amnt > 0",
+    "income_ratio_limit": "0 <= loan_percent_income <= 0.40",
+    "valid_interest_rate": "0 <= loan_int_rate <= 100",
+    "employment_history_bounds": "0 <= person_emp_length <= person_age - 18",
+    "credit_history_bounds": "0 <= cb_person_cred_hist_length <= person_age - 18",
+}
+
+REQUIRED_Z3_COLUMNS = (
+    "person_age",
+    "person_income",
+    "loan_amnt",
+    "loan_percent_income",
+    "loan_int_rate",
+    "person_emp_length",
+    "cb_person_cred_hist_length",
+)
+
+
+def _parse_real_value(value: Any) -> tuple[str | None, str | None]:
+    """
+    Parse a dataset cell into a canonical finite numeric string for Z3 RealVal.
+    Returns (numeric_str, error_message):
+      - Missing values (None, NaN, empty string) return (None, None).
+      - Invalid / non-finite values return (None, error_message).
+      - Valid finite numbers return (numeric_str, None).
+    """
+    if value is None or pd.isna(value):
+        return None, None
+
+    if isinstance(value, (bool, np.bool_)):
+        return None, f"Invalid boolean value {value!r} for numeric field"
+
+    if isinstance(value, (int, np.integer)):
+        return str(int(value)), None
+
+    if isinstance(value, (float, np.floating)):
+        fval = float(value)
+        if not math.isfinite(fval):
+            return None, f"Non-finite float value {value!r}"
+        return repr(fval), None
+
+    if isinstance(value, str):
+        text = value.strip()
+        if not text:
+            return None, None
+    else:
+        text = str(value).strip()
+
     try:
+        dec = Decimal(text)
+    except (InvalidOperation, ValueError, TypeError) as exc:
+        return None, f"Invalid numeric value {value!r}: {exc}"
+
+    if not dec.is_finite():
+        return None, f"Non-finite numeric value {value!r}"
+
+    return str(dec), None
+
+
+class _Z3PolicyVerifier:
+    """Reusable Z3 solver and per-run memoizer for the six illustrative policies."""
+
+    def __init__(self) -> None:
+        self.errors: list[str] = []
+        self._memo: dict[tuple[Any, ...], str] = {}
+        self.solver = self._new_solver() if Z3_AVAILABLE else None
+
+        if Z3_AVAILABLE:
+            self.zero = RealVal(0)
+            self.eighteen = RealVal(18)
+            self.hundred = RealVal(100)
+            self.max_ratio = RealVal(str(MAX_LOAN_PERCENT_INCOME))
+
+            self.age = Real("age")
+            self.income = Real("income")
+            self.amount = Real("amount")
+            self.ratio = Real("ratio")
+            self.rate = Real("rate")
+            self.employment = Real("employment")
+            self.history = Real("history")
+
+            self.exprs = {
+                "adult_eligibility": self.age >= self.eighteen,
+                "positive_income_and_loan": And(self.income > self.zero, self.amount > self.zero),
+                "income_ratio_limit": And(self.ratio >= self.zero, self.ratio <= self.max_ratio),
+                "valid_interest_rate": And(self.rate >= self.zero, self.rate <= self.hundred),
+                "employment_history_bounds": And(
+                    self.employment >= self.zero,
+                    self.employment <= self.age - self.eighteen,
+                ),
+                "credit_history_bounds": And(
+                    self.history >= self.zero,
+                    self.history <= self.age - self.eighteen,
+                ),
+            }
+        else:
+            self.exprs = {}
+
+    @staticmethod
+    def _new_solver():
         solver = Solver()
-        solver.add(conditions)
-        result = solver.check()
-        if result == sat:
-            return "PASS"
-        if result == unsat:
-            return "FAIL"
-        logging.warning("Z3 returned '%s' for %s", result, name)
-        return "UNVERIFIABLE"
-    except Z3Exception:
-        logging.exception("Z3 evaluation failed: %s", name)
-        return "UNVERIFIABLE"
+        solver.set("timeout", 1000)
+        return solver
 
+    def _record_error(self, message: str) -> None:
+        self.errors.append(message)
 
-def _verify_policies_for_row(row: pd.Series) -> dict:
-    """Return {rule_name: PASS/FAIL/UNVERIFIABLE} for one borrower row."""
-    if not Z3_AVAILABLE:
-        return {r: "UNVERIFIABLE" for r in POLICY_RULES}
-    try:
-        age = Real("age"); income = Real("income"); amount = Real("amount")
-        ratio = Real("ratio"); rate = Real("rate")
-        employment = Real("employment"); history = Real("history")
+    def _check_policy(
+        self,
+        rule: str,
+        key: tuple[str, ...],
+        bindings_builder,
+    ) -> str:
+        if not Z3_AVAILABLE or self.solver is None:
+            return "UNVERIFIABLE"
 
-        base = And(
-            age == RealVal(str(row["person_age"])),
-            income == RealVal(str(row["person_income"])),
-            amount == RealVal(str(row["loan_amnt"])),
-            ratio == RealVal(str(row["loan_percent_income"])),
-            rate == RealVal(str(row["loan_int_rate"])),
-            employment == RealVal(str(row["person_emp_length"])),
-            history == RealVal(str(row["cb_person_cred_hist_length"])),
-        )
+        memo_key = (rule, *key)
+        cached = self._memo.get(memo_key)
+        if cached is not None:
+            return cached
 
-        policies = {
-            "adult_eligibility": And(base, age >= 18),
-            "positive_income_and_loan": And(base, income > 0, amount > 0),
-            "income_ratio_limit": And(base, ratio >= 0,
-                                      ratio <= RealVal(str(MAX_LOAN_PERCENT_INCOME))),
-            "valid_interest_rate": And(base, rate >= 0, rate <= 100),
-            "employment_history_bounds": And(base, employment >= 0, employment <= age - 18),
-            "credit_history_bounds": And(base, history >= 0, history <= age - 18),
+        popped = False
+        try:
+            self.solver.push()
+            for binding in bindings_builder():
+                self.solver.add(binding)
+            self.solver.add(self.exprs[rule])
+            result = self.solver.check()
+            self.solver.pop()
+            popped = True
+
+            if result == sat:
+                outcome = "PASS"
+            elif result == unsat:
+                outcome = "FAIL"
+            else:
+                msg = f"{rule}: Z3 returned {result} for inputs {key}"
+                logging.warning(msg)
+                self._record_error(msg)
+                outcome = "UNVERIFIABLE"
+        except (Z3Exception, ValueError, TypeError) as exc:
+            msg = f"{rule}: {type(exc).__name__}: {exc} (inputs={key})"
+            logging.exception("Z3 evaluation failed for %s with inputs %s", rule, key)
+            self._record_error(msg)
+            if not popped:
+                try:
+                    self.solver.pop()
+                except Z3Exception:
+                    self.solver = self._new_solver()
+            outcome = "UNVERIFIABLE"
+
+        self._memo[memo_key] = outcome
+        return outcome
+
+    def verify_values(
+        self,
+        age_raw: Any,
+        income_raw: Any,
+        amount_raw: Any,
+        ratio_raw: Any,
+        rate_raw: Any,
+        employment_raw: Any,
+        history_raw: Any,
+        borrower_label: str = "",
+    ) -> dict[str, str]:
+        if not Z3_AVAILABLE:
+            return {rule: "UNVERIFIABLE" for rule in POLICY_RULES}
+
+        parsed: dict[str, str | None] = {}
+        raw_map = {
+            "person_age": age_raw,
+            "person_income": income_raw,
+            "loan_amnt": amount_raw,
+            "loan_percent_income": ratio_raw,
+            "loan_int_rate": rate_raw,
+            "person_emp_length": employment_raw,
+            "cb_person_cred_hist_length": history_raw,
         }
-        return {name: _z3_check(name, formula) for name, formula in policies.items()}
-    except (Z3Exception, InvalidOperation, ValueError):
-        logging.exception("Policy verification failed for a row")
-        return {r: "UNVERIFIABLE" for r in POLICY_RULES}
+        for col, raw_val in raw_map.items():
+            val_str, err = _parse_real_value(raw_val)
+            if err is not None:
+                prefix = f"[{borrower_label}] " if borrower_label else ""
+                full_err = f"{prefix}{col}: {err}"
+                logging.error(full_err)
+                self._record_error(full_err)
+            parsed[col] = val_str
+
+        age_s = parsed["person_age"]
+        inc_s = parsed["person_income"]
+        amt_s = parsed["loan_amnt"]
+        rat_s = parsed["loan_percent_income"]
+        rt_s = parsed["loan_int_rate"]
+        emp_s = parsed["person_emp_length"]
+        crd_s = parsed["cb_person_cred_hist_length"]
+
+        results: dict[str, str] = {}
+
+        if age_s is None:
+            results["adult_eligibility"] = "UNVERIFIABLE"
+        else:
+            results["adult_eligibility"] = self._check_policy(
+                "adult_eligibility",
+                (age_s,),
+                lambda: (self.age == RealVal(age_s),),
+            )
+
+        if inc_s is None or amt_s is None:
+            results["positive_income_and_loan"] = "UNVERIFIABLE"
+        else:
+            results["positive_income_and_loan"] = self._check_policy(
+                "positive_income_and_loan",
+                (inc_s, amt_s),
+                lambda: (self.income == RealVal(inc_s), self.amount == RealVal(amt_s)),
+            )
+
+        if rat_s is None:
+            results["income_ratio_limit"] = "UNVERIFIABLE"
+        else:
+            results["income_ratio_limit"] = self._check_policy(
+                "income_ratio_limit",
+                (rat_s,),
+                lambda: (self.ratio == RealVal(rat_s),),
+            )
+
+        if rt_s is None:
+            results["valid_interest_rate"] = "UNVERIFIABLE"
+        else:
+            results["valid_interest_rate"] = self._check_policy(
+                "valid_interest_rate",
+                (rt_s,),
+                lambda: (self.rate == RealVal(rt_s),),
+            )
+
+        if age_s is None or emp_s is None:
+            results["employment_history_bounds"] = "UNVERIFIABLE"
+        else:
+            results["employment_history_bounds"] = self._check_policy(
+                "employment_history_bounds",
+                (age_s, emp_s),
+                lambda: (self.age == RealVal(age_s), self.employment == RealVal(emp_s)),
+            )
+
+        if age_s is None or crd_s is None:
+            results["credit_history_bounds"] = "UNVERIFIABLE"
+        else:
+            results["credit_history_bounds"] = self._check_policy(
+                "credit_history_bounds",
+                (age_s, crd_s),
+                lambda: (self.age == RealVal(age_s), self.history == RealVal(crd_s)),
+            )
+
+        return results
+
+
+def _verify_policies_for_row(
+    row: pd.Series,
+    verifier: _Z3PolicyVerifier | None = None,
+) -> dict[str, str]:
+    """Verify each of the six illustrative policies independently for one borrower."""
+    if not Z3_AVAILABLE:
+        return {rule: "UNVERIFIABLE" for rule in POLICY_RULES}
+
+    active_verifier = verifier if verifier is not None else _Z3PolicyVerifier()
+    return active_verifier.verify_values(
+        row.get("person_age", None),
+        row.get("person_income", None),
+        row.get("loan_amnt", None),
+        row.get("loan_percent_income", None),
+        row.get("loan_int_rate", None),
+        row.get("person_emp_length", None),
+        row.get("cb_person_cred_hist_length", None),
+    )
+
+
+def _compute_z3_cache_version() -> str:
+    """Hash policy definitions, Z3 version, and verification logic to bust stale caches."""
+    h = hashlib.sha256()
+    h.update(repr(POLICY_RULES).encode("utf-8"))
+    h.update(repr(POLICY_DEFINITIONS).encode("utf-8"))
+    h.update(str(MAX_LOAN_PERCENT_INCOME).encode("utf-8"))
+    h.update(str(Z3_AVAILABLE).encode("utf-8"))
+    if Z3_AVAILABLE:
+        try:
+            h.update(get_version_string().encode("utf-8"))
+        except Exception:
+            pass
+    for obj in (_parse_real_value, _Z3PolicyVerifier, _verify_policies_for_row):
+        try:
+            h.update(inspect.getsource(obj).encode("utf-8"))
+        except (OSError, TypeError):
+            pass
+    return h.hexdigest()[:16]
+
+
+def _file_sha256(path: Path) -> str:
+    """Compute SHA-256 digest of a dataset file so data edits invalidate cache."""
+    h = hashlib.sha256()
+    with open(path, "rb") as f:
+        for chunk in iter(lambda: f.read(65536), b""):
+            h.update(chunk)
+    return h.hexdigest()[:16]
+
+
+Z3_CACHE_VERSION = _compute_z3_cache_version()
 
 
 @st.cache_data(show_spinner=False)
-def run_z3_verification(data_path: str, mtime: float, seed: int, target: str):
+def run_z3_verification(
+    data_path: str,
+    mtime: float,
+    seed: int,
+    target: str,
+    policy_version: str = Z3_CACHE_VERSION,
+    data_hash: str = "",
+    model_mtime: float = 0.0,
+):
     """
-    Execute the Z3 + model verification pipeline and return:
+    Execute Z3 policy verification + ML predictions for every borrower and return:
       - results_df : one row per borrower, with prediction columns + rule columns
       - report_text: the human-readable audit text (also written to disk)
     """
+    _ = (mtime, seed, target, policy_version, data_hash, model_mtime)
+
     df = pd.read_csv(data_path)
     df.columns = [str(c).strip() for c in df.columns]
 
-    # Borrower IDs
     if "borrower_id" in df.columns:
         ids = df["borrower_id"].astype(str).reset_index(drop=True)
     else:
@@ -441,28 +724,46 @@ def run_z3_verification(data_path: str, mtime: float, seed: int, target: str):
     results_df = pd.DataFrame(index=df.index)
     results_df["Borrower"] = ids.values
 
-    # Model predictions
+    errors_encountered: list[str] = []
+
+    if not Z3_AVAILABLE:
+        err_msg = f"z3-solver unavailable: {Z3_IMPORT_ERROR or 'ImportError'}"
+        logging.error(err_msg)
+        errors_encountered.append(err_msg)
+
+    # Preserve existing ML predictions without modifying the ML pipeline
     try:
-        loaded = load_model(str(COMBINED_PATH), COMBINED_PATH.stat().st_mtime)
+        loaded = load_model(
+            str(COMBINED_PATH),
+            COMBINED_PATH.stat().st_mtime,
+        )
         models = _extract_models(loaded)
-    except Exception:
+    except Exception as exc:
+        logging.exception("Could not load ML models")
+        errors_encountered.append(f"ML model load error: {type(exc).__name__}: {exc}")
         models = {}
 
     feature_cols = [
-        "person_age", "person_income", "person_home_ownership",
-        "person_emp_length", "loan_intent", "loan_grade", "loan_amnt",
-        "loan_int_rate", "loan_percent_income",
-        "cb_person_default_on_file", "cb_person_cred_hist_length",
+        "person_age",
+        "person_income",
+        "person_home_ownership",
+        "person_emp_length",
+        "loan_intent",
+        "loan_grade",
+        "loan_amnt",
+        "loan_int_rate",
+        "loan_percent_income",
+        "cb_person_default_on_file",
+        "cb_person_cred_hist_length",
     ]
     present = [c for c in feature_cols if c in df.columns]
-    X_for_models = df[present].copy() if present else None
 
-    if X_for_models is not None and models:
+    if present and models:
+        X = df[present].copy()
         for name, model in models.items():
             try:
-                Xm = align_for_model(X_for_models, model)
-                pred = np.asarray(model.predict(Xm))
-                results_df[f"{name} predicted"] = pred
+                Xm = align_for_model(X, model)
+                results_df[f"{name} predicted"] = np.asarray(model.predict(Xm))
                 if hasattr(model, "predict_proba"):
                     try:
                         proba = np.asarray(model.predict_proba(Xm))
@@ -473,77 +774,128 @@ def run_z3_verification(data_path: str, mtime: float, seed: int, target: str):
                             results_df[f"{name} P(pos)"] = np.round(proba[:, 1], 6)
                     except Exception:
                         pass
-            except Exception:
+            except Exception as exc:
                 logging.exception("Prediction failed for model %s", name)
+                errors_encountered.append(f"ML prediction error ({name}): {type(exc).__name__}: {exc}")
 
-    # If we have at least 2 models, add a disagreement flag
     pred_cols = [c for c in results_df.columns if c.endswith(" predicted")]
     if len(pred_cols) >= 2:
         results_df["Model predictions agree"] = results_df[pred_cols].apply(
-            lambda row: len(set(row.astype(str))) == 1, axis=1
+            lambda r: len(set(r.astype(str))) == 1, axis=1
         )
 
-    # Per-rule Z3 results
-    rule_results = []
-    for _, row in df.iterrows():
-        rule_results.append(_verify_policies_for_row(row))
-    rules_df = pd.DataFrame(rule_results, index=df.index)
+    # Check for missing required Z3 columns once before iterating
+    for col in REQUIRED_Z3_COLUMNS:
+        if col not in df.columns:
+            msg = f"Missing required Z3 column in dataset: {col}"
+            logging.error(msg)
+            errors_encountered.append(msg)
+
+    # Run independent six-policy Z3 verification using a shared solver
+    verifier = _Z3PolicyVerifier()
+    n_rows = len(df)
+    col_arrays = {
+        col: (df[col].tolist() if col in df.columns else [None] * n_rows)
+        for col in REQUIRED_Z3_COLUMNS
+    }
+
+    rule_columns: dict[str, list[str]] = {rule: [] for rule in POLICY_RULES}
+    for bid, age_v, inc_v, amt_v, rat_v, rt_v, emp_v, crd_v in zip(
+        ids.tolist(),
+        col_arrays["person_age"],
+        col_arrays["person_income"],
+        col_arrays["loan_amnt"],
+        col_arrays["loan_percent_income"],
+        col_arrays["loan_int_rate"],
+        col_arrays["person_emp_length"],
+        col_arrays["cb_person_cred_hist_length"],
+    ):
+        row_res = verifier.verify_values(
+            age_v, inc_v, amt_v, rat_v, rt_v, emp_v, crd_v, borrower_label=str(bid)
+        )
+        for rule in POLICY_RULES:
+            rule_columns[rule].append(row_res[rule])
 
     for rule in POLICY_RULES:
-        results_df[rule] = rules_df.get(rule, "UNVERIFIABLE")
+        results_df[rule] = rule_columns[rule]
 
-    # Aggregate compliance = all rules PASS
-    results_df["All policies passed"] = results_df[POLICY_RULES].apply(
-        lambda r: all(str(v).upper() == "PASS" for v in r), axis=1
+    errors_encountered.extend(verifier.errors)
+
+    # Aggregate compliance: PASS across all six policies
+    results_df["All policies passed"] = (
+        results_df[POLICY_RULES] == "PASS"
+    ).all(axis=1)
+
+    total_borrowers = len(results_df)
+    passed_all_n = int(results_df["All policies passed"].sum())
+    review_n = total_borrowers - passed_all_n
+    has_fail_n = int((results_df[POLICY_RULES] == "FAIL").any(axis=1).sum())
+    unverifiable_only_n = int(
+        ((results_df[POLICY_RULES] != "FAIL").all(axis=1) & (~results_df["All policies passed"])).sum()
     )
 
-    # Build the human-readable audit text
     lines = [
-        "MODEL PREDICTION + Z3 POLICY VERIFICATION",
-        "=" * 78,
+        "LENDVERIFY - Z3 POLICY VERIFICATION REPORT",
+        "=" * 65,
         f"Generated: {datetime.now().isoformat()}",
         f"Dataset: {data_path}",
-        f"Rows evaluated: {len(results_df)}",
+        f"Total borrowers evaluated: {total_borrowers}",
         "",
-        "IMPORTANT: Policy thresholds are illustrative, not approved lending policy.",
+        "IMPORTANT: These six policies are illustrative constraints, not actual bank regulations.",
+        "",
+        "SIX ILLUSTRATIVE LENDING POLICIES",
+        "-" * 65,
+    ]
+
+    for rule in POLICY_RULES:
+        lines.append(f"{rule}: {POLICY_DEFINITIONS[rule]}")
+
+    lines.extend([
         "",
         "AGGREGATE SUMMARY",
-        "-" * 78,
-        f"Total borrowers: {len(results_df)}",
-        f"All policies passed: {int(results_df['All policies passed'].sum())}",
-    ]
-    if "Model predictions agree" in results_df.columns:
-        lines.append(f"Model agreement: {int(results_df['Model predictions agree'].sum())}/{len(results_df)}")
-    lines.append("")
-    lines.append("POLICY FAILURE COUNTS")
-    lines.append("-" * 78)
+        "-" * 65,
+        f"Total borrowers evaluated: {total_borrowers}",
+        f"Borrowers passing all six policies: {passed_all_n}",
+        f"Borrowers requiring review: {review_n}",
+        f"  - With at least one FAIL: {has_fail_n}",
+        f"  - With UNVERIFIABLE only (no FAIL): {unverifiable_only_n}",
+        "",
+        "POLICY OUTCOME COUNTS",
+        "-" * 65,
+    ])
+
     for rule in POLICY_RULES:
-        vals = results_df[rule].astype(str).str.upper()
-        lines.append(f"{rule}: PASS={int((vals=='PASS').sum())}, "
-                     f"FAIL={int((vals=='FAIL').sum())}, "
-                     f"UNVERIFIABLE={int((vals=='UNVERIFIABLE').sum())}")
-    lines.append("")
-    lines.append("PER-BORROWER RESULTS")
-    lines.append("-" * 78)
-    for _, r in results_df.iterrows():
-        lines.append(f"Borrower: {r['Borrower']}")
-        for c in pred_cols:
-            lines.append(f"  {c}: {r[c]}")
-        lines.append(f"  All policies passed: {r['All policies passed']}")
-        if "Model predictions agree" in results_df.columns:
-            lines.append(f"  Model predictions agree: {r['Model predictions agree']}")
-        lines.append("  Policy results:")
-        for rule in POLICY_RULES:
-            lines.append(f"    {rule}: {r[rule]}")
-        lines.append("")
+        vals = results_df[rule]
+        lines.append(
+            f"{rule}: "
+            f"PASS={int((vals == 'PASS').sum())}, "
+            f"FAIL={int((vals == 'FAIL').sum())}, "
+            f"UNVERIFIABLE={int((vals == 'UNVERIFIABLE').sum())}"
+        )
+
+    lines.extend([
+        "",
+        "ERRORS ENCOUNTERED",
+        "-" * 65,
+    ])
+    if not errors_encountered:
+        lines.append("None (0 errors encountered)")
+    else:
+        lines.append(f"Total error events: {len(errors_encountered)}")
+        counts = Counter(errors_encountered)
+        for err_text, count in counts.most_common(25):
+            suffix = f" (x{count})" if count > 1 else ""
+            lines.append(f"- {err_text}{suffix}")
+        if len(counts) > 25:
+            lines.append(f"... and {len(counts) - 25} additional distinct error messages (see lendverify.log).")
+
     report_text = "\n".join(lines)
 
-    # Persist the audit text (for download / record), never parsed.
     try:
         OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
         Z3_PATH.write_text(report_text, encoding="utf-8")
     except OSError:
-        logging.warning("Could not write Z3 report to disk")
+        logging.exception("Could not save Z3 report")
 
     return results_df, report_text
 
@@ -652,6 +1004,22 @@ def ensure_pipeline():
     return st.session_state.pipeline_result
 
 
+def _current_z3_signature():
+    if df is None or not DATA_PATH.exists():
+        return None
+    stat = DATA_PATH.stat()
+    model_mtime = COMBINED_PATH.stat().st_mtime if COMBINED_PATH.exists() else 0.0
+    return (
+        len(df),
+        stat.st_mtime,
+        stat.st_size,
+        model_mtime,
+        int(seed),
+        str(target_col or TARGET_DEFAULT),
+        Z3_CACHE_VERSION,
+    )
+
+
 def do_z3():
     if df is None:
         st.error("Cannot run Z3 verification: dataset missing.")
@@ -662,12 +1030,23 @@ def do_z3():
     start = time.perf_counter()
     try:
         with st.spinner("Running Z3 policy verification…"):
+            # Clear cached Z3 output on explicit button click so updated logic/data always runs fresh.
+            run_z3_verification.clear()
+            stat = DATA_PATH.stat()
+            data_hash = _file_sha256(DATA_PATH)
+            model_mtime = COMBINED_PATH.stat().st_mtime if COMBINED_PATH.exists() else 0.0
             results_df, report_text = run_z3_verification(
-                str(DATA_PATH), DATA_PATH.stat().st_mtime, int(seed), str(target_col or TARGET_DEFAULT)
+                str(DATA_PATH),
+                stat.st_mtime,
+                int(seed),
+                str(target_col or TARGET_DEFAULT),
+                policy_version=Z3_CACHE_VERSION,
+                data_hash=data_hash,
+                model_mtime=model_mtime,
             )
         st.session_state.z3_result = results_df
         st.session_state.z3_report_text = report_text
-        st.session_state.z3_signature = (len(df), int(seed), str(target_col or TARGET_DEFAULT))
+        st.session_state.z3_signature = _current_z3_signature()
         st.success(f"Z3 verification completed in {time.perf_counter() - start:.2f}s · {len(results_df)} borrowers.")
     except Exception as exc:
         logging.exception("Z3 verification failed")
@@ -675,7 +1054,8 @@ def do_z3():
 
 
 def ensure_z3():
-    if st.session_state.z3_result is None:
+    sig = _current_z3_signature()
+    if st.session_state.z3_result is None or st.session_state.z3_signature != sig:
         return None
     return st.session_state.z3_result
 
@@ -712,13 +1092,14 @@ if page == "Home":
             do_pipeline()
         if st.button("🧮  Run Z3 verification", use_container_width=True):
             do_z3()
+            z3_df = ensure_z3()
         if result:
             st.caption(f"Last ML run: {result['created_at']} · {result['elapsed']:.2f}s · seed {seed}")
         if z3_df is not None:
             st.caption(f"Z3: {len(z3_df)} borrowers verified")
     with right:
         st.markdown("### Report")
-        if st.session_state.z3_report_text:
+        if z3_df is not None and st.session_state.z3_report_text:
             st.download_button(
                 "Download Z3 audit report (.txt)",
                 st.session_state.z3_report_text.encode("utf-8"),
@@ -855,12 +1236,12 @@ elif page == "Z3 Verification":
             if st.button("🧮  Run Z3 verification", type="primary", use_container_width=True):
                 do_z3()
         with col_b:
-            if st.session_state.z3_result is not None:
-                st.caption(f"Last run: {len(st.session_state.z3_result)} borrowers verified")
+            z3_df = ensure_z3()
+            if z3_df is not None:
+                st.caption(f"Last run: {len(z3_df)} borrowers verified")
             else:
                 st.caption("Click to generate fresh Z3 results.")
 
-        z3_df = ensure_z3()
         if z3_df is None or z3_df.empty:
             st.info("No Z3 results yet. Click **Run Z3 verification** above.")
         else:
@@ -1010,8 +1391,8 @@ elif page == "Z3 Verification":
 
 
 # --------------------------- PARAMETER ANALYSIS -------------------------
-            elif page == "Parameter Analysis":
-                st.subheader("Parameter analysis")
+elif page == "Parameter Analysis":
+    st.subheader("Parameter analysis")
 
     z3_df = ensure_z3()
     if df is None:

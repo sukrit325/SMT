@@ -1,65 +1,59 @@
+
 from dataclasses import dataclass
+
 
 @dataclass
 class Borrower:
-    # Custom business rules (4)
-    profitable_fy1: bool
-    profitable_fy2: bool
-    bank_credits: float
-    turnover: float
-    repayment_bounces: int
-    bounces_cleared_within_3_days: bool
-    deviation_approved: bool
-    monthly_income: float
-    existing_emi: float
-    monthly_savings: float
-    family_expenses: float
-    proposed_emi: float
-    # Standard LendingClub rules (2)
     person_age: int
+    person_income: float
+    person_home_ownership: str
+    person_emp_length: float
+    loan_intent: str
+    loan_grade: str
+    loan_amnt: float
     loan_int_rate: float
-    
+    loan_status: int
+    loan_percent_income: float
+    cb_person_default_on_file: str
+    cb_person_cred_hist_length: float
+
+
 def check_policies(b: Borrower) -> dict:
+
     rules = {
-        # Rule 1
-        "Two profitable financial years": (
-            b.profitable_fy1 and b.profitable_fy2
-        ),
-        # Rule 2
-        "Bank credits at least equal turnover": (
-            b.bank_credits >= b.turnover
-        ),
-        # Rule 3
-        "Repayment history": (
-            b.repayment_bounces == 0
-            or (
-                0 < b.repayment_bounces <= 2
-                and b.bounces_cleared_within_3_days
-                and b.deviation_approved
-            )
-        ),
-        # Rule 4
+
+        # Rule 1: Adult eligibility
         "Adult eligibility": (
-            b.person_age >= 18 and b.person_age <= 100
+            18 <= b.person_age <= 100
         ),
-        # Rule 5
+
+        # Rule 2: Valid employment history
+        "Valid employment history": (
+            0 <= b.person_emp_length <= 60
+        ),
+
+        # Rule 3: Valid annual income
+        "Positive annual income": (
+            b.person_income > 0
+        ),
+
+        # Rule 4: Loan amount must be positive
+        "Valid loan amount": (
+            b.loan_amnt > 0
+        ),
+
+        # Rule 5: Interest rate bounds
         "Valid interest rate": (
-            b.loan_int_rate >= 5.0 and b.loan_int_rate <= 25.0
+            5.0 <= b.loan_int_rate <= 25.0
+        ),
+
+        # Rule 6: Loan-to-income ratio
+        "Loan income ratio limit": (
+            0 < b.loan_percent_income <= 0.50
         )
     }
-    
-    available_surplus = (
-        b.monthly_income - b.family_expenses - b.existing_emi - b.monthly_savings
-    )
-    
-    # Rule 6
-    rules["Proposed EMI within available surplus"] = (
-        b.proposed_emi >= 0
-        and b.proposed_emi <= available_surplus
-    )
-    
+
     return {
         "rules": rules,
-        "available_surplus": available_surplus,
-        "compliant": all(rules.values()),
+        "compliant": all(rules.values())
     }

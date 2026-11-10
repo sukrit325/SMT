@@ -1,62 +1,42 @@
+
 import os
 import pandas as pd
 
 DATASET_DIR = "/kaggle/input/datasets/laotse/credit-risk-dataset"
-DATASET_FILENAME = "borrowers.csv"
 
-DATA_PATH = "../data/borrowers.csv"
+# Search for either expected filename
+POSSIBLE_FILES = [
+    "borrowers.csv",
+    "credit_risk_dataset.csv"
+]
+
+DATA_PATH = None
 
 for dirname, _, filenames in os.walk(DATASET_DIR):
+
     for filename in filenames:
-        if filename.lower() == DATASET_FILENAME.lower():
+
+        if filename.lower() in POSSIBLE_FILES:
             DATA_PATH = os.path.join(dirname, filename)
             break
+
     if DATA_PATH is not None:
         break
 
 if DATA_PATH is None:
     raise FileNotFoundError(
-        f"Could not find {DATASET_FILENAME} inside {DATASET_DIR}. "
-        "Check the available files printed below."
+        f"No expected CSV found in {DATASET_DIR}. "
+        "Please inspect the available filenames."
     )
 
 df = pd.read_csv(DATA_PATH)
 
-# print("Dataset path:", DATA_PATH)
-# print("Dataset shape:", df.shape)
-# print("\nColumns:")
-# print(df.columns.tolist())
+print("Dataset path:", DATA_PATH)
+print("Dataset shape:", df.shape)
+print("Columns:", df.columns.tolist())
 
-# print("Dataset information:")
-# df.info()
+print("\nMissing values:")
+print(df.isnull().sum())
 
-# print("\nMissing values:")
-# missing_summary = (
-#     df.isnull()
-#     .sum()
-#     .to_frame("missing_count")
-#     .assign(
-#         missing_percentage=lambda x: (
-#             x["missing_count"] / len(df) * 100
-#         ).round(2)
-#     )
-#     .sort_values("missing_percentage", ascending=False)
-# )
-
-# print(missing_summary)
-
-# print("\nDuplicate rows:", df.duplicated().sum())
-
-# print("\nTarget distribution:")
-# print(
-#     df["loan_status"]
-#     .value_counts(dropna=False)
-#     .sort_index()
-#     .to_frame("count")
-#     .assign(
-#         percentage=lambda x: (
-#             x["count"] / len(df) * 100
-#         ).round(2)
-#     )
-# )
-
+print("\nTarget distribution:")
+print(df["loan_status"].value_counts(dropna=False))
