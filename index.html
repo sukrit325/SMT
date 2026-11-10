@@ -1,0 +1,1181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My Oily Skin Journal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav">
+  <div class="nav-inner">
+    <span class="nav-logo">🫧 Oily Skin Journal</span>
+    <div class="nav-links">
+    <a href="#routine">Routine</a>
+    <a href="#facepack">Pack</a>
+    <a href="#learn">Learn</a>
+    <a href="#diet">Diet</a>
+    <a href="#detan">De-Tan</a>
+    <a href="#vitd">Vit D</a>
+    <a href="#viral">Tips</a>
+    <a href="#products">Products</a>
+    <a href="#freshen">Wash</a>
+    <a href="#tracker">Tracker</a>
+    <a href="#history">History</a>
+    <a href="#photos">Photos</a>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero" id="home">
+  <h1>My Oily Skin Journal</h1>
+  <p>Track, learn, and improve — one day at a time.</p>
+  <a href="#tracker" class="btn-cta">Log Today →</a>
+</section>
+
+<!-- ROUTINE -->
+<section class="section" id="routine">
+  <h2>Your Routine</h2>
+  <div class="card-grid">
+    <div class="card product-card">
+      <h3>Derma Co Facewash</h3>
+      <span class="tag">Face · AM + PM</span>
+      <p>Gentle foaming cleanser. Use ~60 sec with lukewarm water. Pat dry — don't rub.</p>
+    </div>
+    <div class="card product-card">
+      <h3>Derma Co Sunscreen SPF 50</h3>
+      <span class="tag">Face · AM</span>
+      <p>Broad-spectrum. Apply as last step. Wait 15 min before going out. Reapply every 2–3 hrs if outdoors.</p>
+    </div>
+    <div class="card product-card">
+      <h3>Mannlich De-Tan & Detox Body Wash</h3>
+      <span class="tag">Body · Shower · 2–3×/week</span>
+      <p><strong>Actives:</strong> 2% Kojic Acid, 5% Niacinamide, Licorice, HA, Vit C/E/M</p>
+      <p><strong>Tip:</strong> Lather, leave 1–2 min, rinse. Alternate with a gentle plain body wash on other days. <em>Do NOT use on face.</em></p>
+    </div>
+  </div>
+  <h3 class="sub-heading">AM / PM Routine</h3>
+  <div class="routine-grid">
+    <div class="card">
+      <h4>☀️ Morning</h4>
+      <ol>
+        <li>Derma Co Facewash (60 sec, lukewarm water)</li>
+        <li>(Optional) Niacinamide serum 4–5%</li>
+        <li>Lightweight oil-free moisturizer (gel-based)</li>
+        <li>Derma Co Sunscreen SPF 50</li>
+      </ol>
+    </div>
+    <div class="card">
+      <h4>🌙 Night</h4>
+      <ol>
+        <li>Double cleanse (micellar/cleansing balm → Derma Co Facewash)</li>
+        <li>(2–3×/week) Salicylic Acid 2% <em>or</em> Retinol — alternate nights</li>
+        <li>Lightweight oil-free moisturizer</li>
+      </ol>
+    </div>
+    <div class="card">
+      <h4>📅 Weekly</h4>
+      <ul>
+        <li>1× Clay mask (T-zone, 10 min)</li>
+        <li>1–2× BHA exfoliant</li>
+        <li>Change pillowcase 2×/week</li>
+        <li>Clean phone screen + brushes</li>
+        <li>Weekly photo (same lighting/angle)</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- LEARN / DOS & DON'TS -->
+<section class="section" id="learn">
+  <h2>Learn: Dos & Don'ts</h2>
+
+  <div class="accordion">
+    <div class="acc-item">
+      <button class="acc-btn">⚠️ The Reactive Oil Cycle</button>
+      <div class="acc-content">
+        <p>When you strip all oil (harsh wash, scrub, alcohol toner), your barrier is damaged. Sebaceous glands get the signal "skin is dry!" and produce <strong>more</strong> sebum to compensate. You feel oilier → strip more → cycle repeats.</p>
+        <p><strong>Rule:</strong> Never let your face feel "squeaky clean" or tight after washing.</p>
+      </div>
+    </div>
+
+    <div class="acc-item">
+      <button class="acc-btn">✅ DOS — Daily</button>
+      <div class="acc-content">
+        <table class="dos-table">
+          <tr><th>#</th><th>Do</th><th>Why</th></tr>
+          <tr><td>1</td><td>Cleanse twice daily (AM + PM)</td><td>Removes sebum + grime without over-stripping</td></tr>
+          <tr><td>2</td><td>Use a gentle foaming/gel cleanser</td><td>Removes oil without barrier damage. pH 5–6.</td></tr>
+          <tr><td>3</td><td>Moisturize every day (AM & PM)</td><td>Oily skin still needs hydration. Skipping → compensatory oil.</td></tr>
+          <tr><td>4</td><td>Sunscreen daily SPF 30+</td><td>UV thickens sebum, worsens pigmentation & inflammation.</td></tr>
+          <tr><td>5</td><td>Blot oil mid-day with blotting papers</td><td>Absorbs surface oil without disturbing your routine.</td></tr>
+          <tr><td>6</td><td>Use only non-comedogenic products</td><td>Prevents pore-clogging → fewer blackheads & breakouts.</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="acc-item">
+      <button class="acc-btn">✅ DOS — Weekly / Lifestyle</button>
+      <div class="acc-content">
+        <table class="dos-table">
+          <tr><th>#</th><th>Do</th><th>Why</th></tr>
+          <tr><td>7</td><td>Exfoliate 1–2×/week with BHA (salicylic acid)</td><td>Oil-soluble → penetrates inside pores, dissolves sebum + dead cells.</td></tr>
+          <tr><td>8</td><td>Clay mask 1×/week (T-zone, 10 min)</td><td>Absorbs excess sebum, deep clean.</td></tr>
+          <tr><td>9</td><td>Change pillowcase 2×/week</td><td>Prevents bacteria/oil transfer overnight.</td></tr>
+          <tr><td>10</td><td>Clean phone screen + brushes</td><td>Reduces bacteria contact with face.</td></tr>
+          <tr><td>11</td><td>Sleep 7–8 hrs</td><td>Poor sleep → cortisol ↑ → sebum ↑.</td></tr>
+          <tr><td>12</td><td>Exercise regularly + shower after</td><td>Reduces stress hormones, improves circulation.</td></tr>
+          <tr><td>13</td><td>Manage stress (walks, breathing)</td><td>Cortisol directly stimulates sebaceous glands.</td></tr>
+          <tr><td>14</td><td>Drink 2–3 L water daily</td><td>Dehydrated skin → compensatory oil.</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="acc-item">
+      <button class="acc-btn">❌ DON'TS — The Big 5</button>
+      <div class="acc-content">
+        <table class="dos-table">
+          <tr><th>#</th><th>Don't</th><th>Why It Backfires</th></tr>
+          <tr><td>1</td><td>Over-cleansing (more than 2–3×/day)</td><td>Strips barrier → reactive oil cycle. Gets <em>oiler</em>.</td></tr>
+          <tr><td>2</td><td>Skip moisturizer</td><td>Dehydrated skin produces more oil. Also makes actives intolerable.</td></tr>
+          <tr><td>3</td><td>Scrub / harsh physical exfoliants</td><td>Micro-tears → inflammation → more breakouts. Blackheads are <em>inside</em> the pore.</td></tr>
+          <tr><td>4</td><td>Alcohol-based toners / astringents</td><td>Temporary matte → long-term barrier damage → more oil.</td></tr>
+          <tr><td>5</td><td>Touch / pick your face</td><td>Transfers bacteria. Picking → scarring + spread of infection.</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="acc-item">
+      <button class="acc-btn">❌ DON'TS — Products & Lifestyle</button>
+      <div class="acc-content">
+        <table class="dos-table">
+          <tr><th>#</th><th>Don't</th><th>Instead</th></tr>
+          <tr><td>6</td><td>Oil-based / heavy comedogenic products (coconut oil, cocoa butter, lanolin)</td><td>Light humectants: HA, glycerin. If oil: jojoba or squalane.</td></tr>
+          <tr><td>7</td><td>Thick cream-based moisturizers</td><td>Gel-based, oil-free, non-comedogenic lotions.</td></tr>
+          <tr><td>8</td><td>Stack multiple strong actives at once</td><td>One at a time. Alternate nights.</td></tr>
+          <tr><td>9</td><td>Fragranced face products</td><td>Fragrance-free. Fragrance = #1 contact irritant.</td></tr>
+          <tr><td>10</td><td>Sleep in makeup / sunscreen</td><td>Always double-cleanse at night.</td></tr>
+          <tr><td>11</td><td>Use Mannlich de-tan wash on face</td><td>Body only. 2% Kojic Acid is too strong for facial skin.</td></tr>
+          <tr><td>12</td><td>Over-exfoliate (more than 2×/week)</td><td>1–2× max. More = barrier damage.</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="acc-item">
+      <button class="acc-btn">🧪 Ingredient Cheat Sheet</button>
+      <div class="acc-content">
+        <h4>✅ Use These</h4>
+        <table class="dos-table">
+          <tr><th>Ingredient</th><th>What It Does</th></tr>
+          <tr><td>Salicylic Acid (BHA) 0.5–2%</td><td>Dissolves oil inside pores, anti-inflammatory</td></tr>
+          <tr><td>Niacinamide 4–10%</td><td>Reduces sebum ~23%, calms redness, strengthens barrier</td></tr>
+          <tr><td>Hyaluronic Acid</td><td>Lightweight hydration without oil</td></tr>
+          <tr><td>Zinc</td><td>Anti-inflammatory, regulates sebum</td></tr>
+          <tr><td>Retinol / Adapalene</td><td>Speeds cell turnover, prevents clogged pores</td></tr>
+          <tr><td>Benzoyl Peroxide 2.5–5%</td><td>Kills acne bacteria, dries active pimples</td></tr>
+          <tr><td>Glycolic / Lactic Acid (AHA)</td><td>Surface exfoliation, brightens</td></tr>
+          <tr><td>Green Tea Extract</td><td>Antioxidant, anti-inflammatory, mild sebum reduction</td></tr>
+          <tr><td>Clay (Kaolin / Bentonite)</td><td>Absorbs excess oil</td></tr>
+        </table>
+        <h4>❌ Avoid These</h4>
+        <table class="dos-table">
+          <tr><th>Ingredient</th><th>Why</th></tr>
+          <tr><td>Coconut oil</td><td>Highly comedogenic (4/5)</td></tr>
+          <tr><td>Isopropyl Myristate</td><td>Comedogenic emollient</td></tr>
+          <tr><td>Cocoa Butter / Lanolin</td><td>Thick, occlusive, clogs pores</td></tr>
+          <tr><td>Denatured Alcohol (high on INCI)</td><td>Strips barrier → rebound oil</td></tr>
+          <tr><td>Fragrance / Parfum</td><td>#1 contact allergen → irritation → more oil</td></tr>
+          <tr><td>Witch Hazel (high-alcohol)</td><td>Drying, barrier-damaging</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="acc-item">
+      <button class="acc-btn">🧠 Myths vs Facts</button>
+      <div class="acc-content">
+        <table class="dos-table">
+          <tr><th>Myth</th><th>Fact</th></tr>
+          <tr><td>"Oily skin doesn't need moisturizer"</td><td>It does. Dehydrated oily skin produces <em>more</em> oil.</td></tr>
+          <tr><td>"Washing more = less oil"</td><td>Over-washing triggers reactive oil cycle. 2×/day max.</td></tr>
+          <tr><td>"I need a 'strong' facewash"</td><td>Gentle > strong. Harsh = barrier damage = more oil.</td></tr>
+          <tr><td>"Oils are bad for oily skin"</td><td>Not all. Jojoba & squalane mimic sebum, non-comedogenic.</td></tr>
+          <tr><td>"Pores open and close"</td><td>Pores have no muscles. They can't open/close.</td></tr>
+          <tr><td>"Sunscreen makes oily skin oilier"</td><td>Only if wrong formula. Gel/liquid, oil-free = matte.</td></tr>
+          <tr><td>"Blackheads are dirt"</td><td>Oxidized sebum + dead cells <em>inside</em> the pore.</td></tr>
+          <tr><td>"Oily skin ages better"</td><td>Fewer fine lines, yes. But more acne, blackheads, pigmentation.</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- DIET -->
+<section class="section" id="diet">
+  <h2>Diet: What to Eat & Avoid</h2>
+  <div class="diet-mechanism">
+    <code>High-GI food → Blood sugar spike → Insulin ↑ → IGF-1 ↑ → Sebum ↑ + Inflammation ↑ → Breakout</code>
+  </div>
+  <div class="diet-grid">
+    <div class="card eat-card">
+      <h3>✅ Eat (reduces breakouts & oil)</h3>
+      <ul>
+        <li><strong>Fatty fish</strong> (salmon, mackerel, sardines) — Omega-3, anti-inflammatory</li>
+        <li><strong>Walnuts, chia, flaxseeds</strong> — Omega-3 + zinc</li>
+        <li><strong>Pumpkin seeds, chickpeas, lentils</strong> — Zinc regulates sebum</li>
+        <li><strong>Spinach, kale, carrots, sweet potato</strong> — Vitamin A, cell turnover</li>
+        <li><strong>Berries</strong> (blueberry, strawberry) — Antioxidants</li>
+        <li><strong>Whole grains</strong> (oats, brown rice, quinoa) — Low-GI, no insulin spike</li>
+        <li><strong>Green tea</strong> — Antioxidant, anti-inflammatory</li>
+        <li><strong>Turmeric, ginger</strong> — Curcumin/gingerols</li>
+        <li><strong>Kefir, fermented foods</strong> — Probiotics, gut-skin axis</li>
+      </ul>
+    </div>
+    <div class="card avoid-card">
+      <h3>❌ Avoid / Limit (triggers oil & breakouts)</h3>
+      <ul>
+        <li><strong>White bread, maida, pastries, white rice</strong> — High-GI → insulin spike</li>
+        <li><strong>Sugary drinks, soda, candy</strong> — Same mechanism</li>
+        <li><strong>Dairy</strong> (esp. skim milk, cheese, ice cream) — IGF-1 → oil glands</li>
+        <li><strong>Whey protein / protein shakes</strong> — Raises insulin + IGF-1</li>
+        <li><strong>Fried / fast food</strong> (fries, burger, pizza) — Saturated fat → inflammation</li>
+        <li><strong>Red meat & processed sausages</strong> — Pro-inflammatory</li>
+        <li><strong>Excess iodine</strong> (seafood-heavy diet) — Disrupts hormonal balance</li>
+        <li><strong>Alcohol & excess caffeine</strong> — Dehydration + inflammation</li>
+      </ul>
+    </div>
+  </div>
+  <!-- FACE PACK -->
+<section class="section" id="facepack">
+  <h2>My Face Pack</h2>
+  <div class="card">
+    <h3>Multani Mitti + Coffee + Rose Water + Sugar + Honey</h3>
+    <p class="muted" style="margin:8px 0 16px;">1–2×/week. Mix in bowl, apply as paste, leave 10 min, rinse.</p>
+    <table class="dos-table">
+      <tr><th>Ingredient</th><th>Amount</th><th>Role</th></tr>
+      <tr><td>Multani Mitti</td><td>1–2 tbsp</td><td>Absorbs oil, unclogs pores</td></tr>
+      <tr><td>Coffee (fine grind)</td><td>1 tbsp</td><td>Antioxidant</td></tr>
+      <tr><td>Rose water</td><td>Enough for paste</td><td>Base, pH balance</td></tr>
+      <tr><td>Fine white sugar</td><td>½–1 tsp</td><td>Dissolves in bowl → mild exfoliant</td></tr>
+      <tr><td>Honey</td><td>1 tsp</td><td>Humectant, soothes</td></tr>
+    </table>
+  </div>
+  <div class="card">
+    <h4>⚠️ Rules</h4>
+    <ul class="rule-list">
+      <li><strong>1–2×/week max</strong> — clay is drying. Daily = barrier damage.</li>
+      <li><strong>Rinse at semi-dry</strong>, NOT fully cracked. Cracked clay pulls moisture OUT.</li>
+      <li><strong>Lukewarm water</strong> to rinse. No hot water.</li>
+      <li><strong>Moisturize immediately after.</strong></li>
+      <li><strong>SPF next day</strong> — clay + coffee = temporary photosensitivity.</li>
+      <li><strong>Don't apply over active pimples</strong> — traps bacteria.</li>
+      <li><strong>Grind coffee fine</strong> (espresso grind, not coarse) for smoother paste.</li>
+    </ul>
+  </div>
+</section>   
+<!-- DETAN PROGRESS -->
+<section class="section" id="detan">
+  <h2>De-Tan Progress</h2>
+  <div class="card">
+    <h4>How it works</h4>
+    <p style="margin:8px 0;">Kojic acid (in Mannlich) <strong>blocks new melanin production</strong>. It does NOT remove existing pigment. Old pigment leaves through natural cell turnover (~28 days face, slower on body).</p>
+  </div>
+  <div class="card">
+    <h4>What to expect (multi-year tan)</h4>
+    <table class="dos-table">
+      <tr><th>Week</th><th>What's happening</th><th>What you'll see</th></tr>
+      <tr><td>1–2</td><td>Surface build-up washing off. Kojic acid starting to slow new melanin.</td><td>Smoothish texture. <strong>No visible color change yet. Normal.</strong></td></tr>
+      <tr><td>3–4</td><td>Melanin production slowed. Old pigment still sitting there.</td><td>"Nothing visible." This is where people quit. <strong>Don't.</strong></td></tr>
+      <tr><td>5–8</td><td>First turnover cycles complete. Newest tan lifts.</td><td><strong>First photo-comparable difference.</strong></td></tr>
+      <tr><td>8–12</td><td>Older, deeper pigment clearing.</td><td>Noticeable tone difference.</td></tr>
+      <tr><td>3–6 months</td><td>Deep multi-year tan substantially reduced.</td><td>Close to natural undertone.</td></tr>
+    </table>
+  </div>
+  <div class="card">
+    <h4>My Protection Strategy</h4>
+    <ul class="rule-list">
+      <li>🌂 <strong>Umbrella</strong> — covers face, neck, ears, hands properly. Blocks 95%+ UV.</li>
+      <li>🧴 <strong>Derma Co SPF 50</strong> — backup layer under umbrella + for days without umbrella.</li>
+      <li>🚿 <strong>Mannlich daily</strong> — de-tan engine (30–60 sec contact in full shower).</li>
+      <li>🪨 <strong>Multani mitti pack</strong> 1–2×/week — oil control + mild brightening.</li>
+      <li>📸 <strong>Weekly photo</strong> — same lighting, same angle. Track in Photos section.</li>
+    </ul>
+  </div>
+  <div class="card">
+    <h4>🚫 What NOT to spend on</h4>
+    <table class="dos-table">
+      <tr><th>Avoid</th><th>Why</th></tr>
+      <tr><td>Salon de-tan (₹700–1000/session)</td><td>Temporary. Fades in 1–2 weeks. Mannlich does same at 1/100th cost.</td></tr>
+      <tr><td>Laser / IPL (₹5,000–15,000)</td><td>Overkill for tan. For melasma/deep pigmentation only.</td></tr>
+      <tr><td>"Instant de-tan" creams</td><td>Often contain mercury/steroids. Dangerous.</td></tr>
+      <tr><td>Multiple expensive de-tan products</td><td>One kojic wash + SPF + pack = enough.</td></tr>
+    </table>
+  </div>
+</section>   
+<!-- VITAMIN D -->
+<section class="section" id="vitd">
+  <h2>Vitamin D</h2>
+  <div class="card">
+    <h4>The rules</h4>
+    <ul class="rule-list">
+      <li>Only <strong>UVB</strong> makes vitamin D. UVA (tanning ray) does NOT.</li>
+      <li><strong>Before 8 AM = zero UVB.</strong> Sun too low, atmosphere filters it out.</li>
+      <li><strong>10 AM – 1 PM</strong> = peak UVB window. (Winter: shift to 11 AM – 1 PM.)</li>
+      <li><strong>Glass blocks UVB.</strong> Window = no vitamin D.</li>
+      <li>Indian skin (Fitzpatrick V): <strong>15–30 min, 3–4×/week</strong> is enough.</li>
+    </ul>
+  </div>
+  <div class="card">
+    <h4>My routine (de-tan friendly)</h4>
+    <table class="dos-table">
+      <tr><th>What</th><th>How</th></tr>
+      <tr><td>Time</td><td>11 AM – 1 PM (winter) / 10 AM – 12 PM (summer)</td></tr>
+      <tr><td>Duration</td><td>15–20 min</td></tr>
+      <tr><td>Expose</td><td><strong>Forearms + hands + lower legs</strong></td></tr>
+      <tr><td>Keep covered</td><td><strong>Face, neck, ears</strong> (de-tan priority)</td></tr>
+      <tr><td>Frequency</td><td>3–4×/week</td></tr>
+      <tr><td>Sunscreen</td><td><strong>None</strong> on exposed arms/legs during those 15 min</td></tr>
+      <tr><td>After</td><td>Mannlich in next shower. SPF on arms if staying out longer.</td></tr>
+    </table>
+  </div>
+  <div class="card">
+    <h4>Backup: Supplement</h4>
+    <p style="margin:8px 0;">If sun timing doesn't work: <strong>Vitamin D3 60,000 IU, once a week</strong> (Calcirol / D-Rise / Uprise D3 — ₹100–150/month). Same molecule your skin makes, no timing constraint.</p>
+  </div>
+</section>   
+<!-- VIRAL TIPS -->
+<section class="section" id="viral">
+  <h2>Viral Reels Tips</h2>
+
+  <div class="accordion">
+    <div class="acc-item">
+      <button class="acc-btn">📱 Routine & Layering</button>
+      <div class="acc-content">
+        <ul class="rule-list">
+          <li><strong>3-step routine is enough:</strong> Cleanser → Moisturizer → SPF. 12 steps don't outperform 3.</li>
+          <li><strong>Sandwich retinoid:</strong> Moisturizer → Retinol → Moisturizer. Cuts irritation 50%+.</li>
+          <li><strong>Apply on damp skin</strong> for better HA/serum absorption.</li>
+          <li><strong>Order: thinnest → thickest.</strong> Water-based → oil-based.</li>
+          <li><strong>Wait 2 min between layers.</strong></li>
+          <li><strong>Double cleanse at night:</strong> Oil/balm → water-based cleanser.</li>
+          <li><strong>30-second wash rule:</strong> Leave cleanser on face 30 sec before rinsing.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="acc-item">
+      <button class="acc-btn">🧪 Ingredients That Matter</button>
+      <div class="acc-content">
+        <table class="dos-table">
+          <tr><th>Ingredient</th><th>Key Point</th></tr>
+          <tr><td>Niacinamide 5–10%</td><td>#1 for oily skin. Reduces sebum ~23%. Safe daily AM+PM.</td></tr>
+          <tr><td>BHA (Salicylic 2%)</td><td>Best exfoliant for oily skin. 2–3×/week, NOT daily.</td></tr>
+          <tr><td>Retinol 0.025–0.1%</td><td>Start 2–3×/week. Reduces pores long-term.</td></tr>
+          <tr><td>Hyaluronic Acid</td><td>On <strong>damp</strong> skin only. On dry skin it pulls water OUT.</td></tr>
+          <tr><td>Vitamin C (10–15%)</td><td>AM only. Pair with SPF.</td></tr>
+          <tr><td>Zinc PCA (1–5%)</td><td>Underrated sebum regulator + antimicrobial.</td></tr>
+          <tr><td>Bakuchiol (0.5–1%)</td><td>Gentle retinol alternative for sensitive skin.</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="acc-item">
+      <button class="acc-btn">🚫 "Stop Doing This" (Most Viral)</button>
+      <div class="acc-content">
+        <ul class="rule-list">
+          <li><strong>"If it burns, it's working" = FALSE.</strong> Burning = barrier damage.</li>
+          <li><strong>Stop makeup wipes.</strong> Rub + irritants. Use micellar water + cleanser.</li>
+          <li><strong>Stop physical scrubs</strong> (apricot, sugar on face, microbeads). Micro-tears → more oil.</li>
+          <li><strong>Stop alcohol-based toners.</strong> "Clean" feeling = barrier destruction.</li>
+          <li><strong>Stop DIY sunscreens.</strong> No reliable SPF.</li>
+          <li><strong>Stop ice for "pore shrinking."</strong> Pores have no muscles.</li>
+          <li><strong>Stop layering 5+ actives.</strong> 35% of patients get adverse reactions. One at a time.</li>
+          <li><strong>Stop relying on "SPF" in foundation.</strong> Nobody applies enough. Use dedicated SPF.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="acc-item">
+      <button class="acc-btn">🔥 2026 Trends</button>
+      <div class="acc-content">
+        <table class="dos-table">
+          <tr><th>Trend</th><th>What It Is</th></tr>
+          <tr><td>Skin Cycling</td><td>4-night rotation: Exfoliant → Retinoid → Rest → Rest. (Dr. Whitney Bowe)</td></tr>
+          <tr><td>Barrier Repair First</td><td>Pause all actives 2–4 wks. Just cleanser + ceramide moisturizer + SPF.</td></tr>
+          <tr><td>Milky Everything</td><td>Milky toners/serums/SPF. Lightweight hydration. OK for oily if non-comedogenic.</td></tr>
+          <tr><td>Slugging (revived)</td><td>Thin occlusive as last step at night. ⚠️ Oily skin: dry patches only, not full face.</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="acc-item">
+      <button class="acc-btn">💄 Makeup for Oily Skin</button>
+      <div class="acc-content">
+        <ul class="rule-list">
+          <li><strong>Matte, water-based foundation</strong> in thin layers with damp sponge. Press, don't rub.</li>
+          <li><strong>Silicone mattifying primer</strong> on T-zone only. Avoid "dewy" primers.</li>
+          <li><strong>Set strategically</strong> — powder only on oily zones, not full face.</li>
+          <li><strong>Concealer AFTER foundation</strong> (less product, less creasing).</li>
+          <li><strong>Blot, don't powder-reapply</strong> mid-day.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="acc-item">
+      <button class="acc-btn">⚠️ Reels to Be Skeptical Of</button>
+      <div class="acc-content">
+        <table class="dos-table">
+          <tr><th>Trend</th><th>Why It's Bad</th></tr>
+          <tr><td>"Lemon juice for dark spots"</td><td>Citric acid + sun = phytophotodermatitis (burns + worse pigmentation)</td></tr>
+          <tr><td>"Toothpaste for pimples"</td><td>SLS + mint + baking soda = irritation, not treatment</td></tr>
+          <tr><td>"Apple cider vinegar toner"</td><td>Unpredictable pH, can cause chemical burns</td></tr>
+          <tr><td>"Vaseline for acne"</td><td>Occlusive — traps bacteria. Bad for active breakouts.</td></tr>
+          <tr><td>"Coconut oil for everything"</td><td>Comedogenic 4/5. Clogs pores.</td></tr>
+          <tr><td>"90-second 7-product routine"</td><td>Products need time to absorb. Rushing = pilling, no benefit</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>   
+</section>
+
+<!-- PRODUCT WARNINGS -->
+<section class="section" id="products">
+  <h2>Product Warnings</h2>
+  <div class="card">
+    <h4>🚫 Nivea Cocoa (or any thick cream) — NOT for face or body</h4>
+    <table class="dos-table">
+      <tr><th>Ingredient</th><th>Problem</th></tr>
+      <tr><td>Cocoa Butter</td><td>Comedogenic 4/5 — clogs pores</td></tr>
+      <tr><td>Coconut Oil</td><td>Comedogenic 4/5</td></tr>
+      <tr><td>Shea Butter</td><td>Heavy, occlusive</td></tr>
+      <tr><td>Alcohol Denat.</td><td>Drying, irritating</td></tr>
+      <tr><td>Fragrance</td><td>#1 contact irritant</td></tr>
+    </table>
+    <p style="margin-top:10px;"><strong>White marks when scratched</strong> = cream not absorbing, sitting as a film. On oily skin it's just a layer of butter.</p>
+    <p><strong>Face swap:</strong> Pond's Flawless Light Gel (~₹150) — thin, absorbs in 10 sec, no white marks.</p>
+    <p><strong>Body swap:</strong> Skip entirely (Mannlich already has HA + glycerin). If dry: Vaseline Sensitive Body Lotion (~₹200).</p>
+  </div>
+  <div class="card">
+    <h4>✅ My Current Products</h4>
+    <table class="dos-table">
+      <tr><th>Product</th><th>Where</th><th>Frequency</th></tr>
+      <tr><td>Derma Co Facewash</td><td>Face</td><td>AM + PM (30 sec each)</td></tr>
+      <tr><td>Derma Co Sunscreen SPF 50</td><td>Face</td><td>AM (skip if in room all day, not near window)</td></tr>
+      <tr><td>Mannlich De-Tan Body Wash</td><td>Body</td><td>Daily, full shower only (30–60 sec contact)</td></tr>
+      <tr><td>Multani Mitti Pack</td><td>Face</td><td>1–2×/week</td></tr>
+      <tr><td>Umbrella</td><td>Face + neck + ears + hands</td><td>Every time I go out</td></tr>
+    </table>
+  </div>
+</section>   
+
+<!-- FRESHEN UP -->
+<section class="section" id="freshen">
+  <h2>Freshen-Up Rules</h2>
+  <div class="card">
+    <table class="dos-table">
+      <tr><th>Situation</th><th>Face Wash</th><th>Mannlich (Body)</th><th>Notes</th></tr>
+      <tr><td>Mid-day freshen-up</td><td>✅ 30 sec</td><td>❌ Just water</td><td>No need to lather body every time</td></tr>
+      <tr><td>Full shower (1×/day)</td><td>✅ 30 sec</td><td>✅ 30–60 sec wait</td><td>This is your de-tan session</td></tr>
+      <tr><td>After heavy sweating</td><td>✅ 30 sec</td><td>✅ if showering anyway</td><td>Sweat + sebum = clogged pores</td></tr>
+      <tr><td>Coming home from outside</td><td>✅ 30 sec</td><td>❌ Just water</td><td>Remove SPF + pollutants</td></tr>
+    </table>
+    <p style="margin-top:12px;"><strong>Rule:</strong> 1× Mannlich per day (full shower) = your de-tan dose. Don't lather body with kojic acid wash every 3 hours. Plain water is fine for freshen-ups.</p>
+  </div>
+</section>   
+<!-- TRACKER -->
+<section class="section" id="tracker">
+  <h2>Daily Tracker</h2>
+  <div class="card tracker-card">
+    <form id="trackerForm">
+      <div class="form-row">
+        <label>
+          Date
+          <input type="date" id="tDate" required />
+        </label>
+        <label>
+          Oiliness (−5 dry → +5 oily)
+          <input type="range" id="tOil" min="-5" max="5" value="0" />
+          <span id="oilVal">0</span>
+        </label>
+      </div>
+      <div class="form-row">
+        <label>
+          Breakouts
+          <select id="tBreakouts">
+            <option value="0">None</option>
+            <option value="1-3">1–3</option>
+            <option value="4+">4+</option>
+          </select>
+        </label>
+        <label>
+          Sleep (hrs)
+          <input type="number" id="tSleep" min="0" max="14" step="0.5" value="7" />
+        </label>
+        <label>
+          Stress (1–5)
+          <input type="range" id="tStress" min="1" max="5" value="3" />
+          <span id="stressVal">3</span>
+        </label>
+      </div>
+      <div class="form-row">
+        <label>
+          Location
+          <div class="chips" id="tLocations">
+            <input type="checkbox" value="forehead" id="loc-fh"><label for="loc-fh">Forehead</label>
+            <input type="checkbox" value="nose" id="loc-nose"><label for="loc-nose">Nose</label>
+            <input type="checkbox" value="chin" id="loc-chin"><label for="loc-chin">Chin</label>
+            <input type="checkbox" value="cheeks" id="loc-cheeks"><label for="loc-cheeks">Cheeks</label>
+          </div>
+        </label>
+      </div>
+      <div class="form-row">
+        <label>
+          Products Used
+          <input type="text" id="tProducts" placeholder="e.g. Derma Co facewash, sunscreen" />
+        </label>
+      </div>
+
+      <!-- WATER TRACKER -->
+      <div class="water-section">
+        <h4>💧 Water Intake</h4>
+        <div class="water-glasses" id="waterGlasses">
+          <button type="button" class="glass" data-i="1">🥤</button>
+          <button type="button" class="glass" data-i="2">🥤</button>
+          <button type="button" class="glass" data-i="3">🥤</button>
+          <button type="button" class="glass" data-i="4">🥤</button>
+          <button type="button" class="glass" data-i="5">🥤</button>
+          <button type="button" class="glass" data-i="6">🥤</button>
+          <button type="button" class="glass" data-i="7">🥤</button>
+          <button type="button" class="glass" data-i="8">🥤</button>
+        </div>
+        <p class="water-count"><span id="waterCount">0</span> / 8 glasses (2 L)</p>
+        <p class="water-streak" id="waterStreak"></p>
+      </div>
+
+      <div class="form-row">
+        <label>
+          Notes
+          <textarea id="tNotes" rows="3" placeholder="Anything else…"></textarea>
+        </label>
+      </div>
+      <button type="submit" class="btn-cta">Save Entry</button>
+    </form>
+  </div>
+</section>
+
+<!-- HISTORY -->
+<section class="section" id="history">
+  <h2>History & Trends</h2>
+  <div class="card">
+    <canvas id="oilChart" height="80"></canvas>
+  </div>
+  <div class="card">
+    <canvas id="waterChart" height="80"></canvas>
+  </div>
+  <div class="card">
+    <table class="history-table" id="historyTable">
+      <thead><tr><th>Date</th><th>Oil</th><th>Breakouts</th><th>Loc</th><th>Water</th><th>Notes</th></tr></thead>
+      <tbody id="historyBody"></tbody>
+    </table>
+  </div>
+</section>
+
+<!-- PHOTOS -->
+<section class="section" id="photos">
+  <h2>Weekly Photos</h2>
+  <p class="muted">Upload one photo per week (same lighting, same angle). Stored locally.</p>
+  <div class="card">
+  <div class="card">
+  <div class="photo-upload-row">
+    <input type="file" id="photoInput" accept="image/*" />
+    <input type="date" id="photoDate" />
+    <button class="btn-cta" onclick="savePhoto()">Save Photo</button>
+    </div>
+    </div>
+  </div>
+  <div class="card" style="margin-bottom:16px;">
+  <button class="btn-cta" onclick="openCompare()">📸 Compare Photos</button>
+</div>
+
+<!-- Compare Modal -->
+<div class="compare-modal" id="compareModal">
+  <div class="compare-inner">
+    <button class="compare-close" onclick="closeCompare()">✕</button>
+    <h3>Compare</h3>
+    <div class="compare-selects">
+      <select id="compareA"></select>
+      <span class="compare-vs">vs</span>
+      <select id="compareB"></select>
+    </div>
+    <div class="compare-view">
+      <div class="compare-img-box">
+        <img id="compareImgA" src="" alt="Photo A" />
+        <p id="compareDateA"></p>
+      </div>
+      <div class="compare-img-box">
+        <img id="compareImgB" src="" alt="Photo B" />
+        <p id="compareDateB"></p>
+      </div>
+    </div>
+  </div>
+</div>   
+  <div class="photo-grid" id="photoGrid"></div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <p>My Oily Skin Journal · Data stored locally in your browser · <span id="todayDate"></span></p>
+</footer>
+
+<script src="app.js"></script>
+</body>
+<style>
+    :root {
+  --primary: #5B8A72;
+  --secondary: #F5EDE3;
+  --accent: #E8836B;
+  --dark: #2C3E35;
+  --light: #FAFAF7;
+  --muted: #D4E5D9;
+  --radius: 12px;
+  --shadow: 0 2px 12px rgba(44,62,53,0.08);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Inter', sans-serif; background: var(--light); color: var(--dark); line-height: 1.6; }
+
+/* NAV */
+.nav { position: sticky; top: 0; background: var(--light); border-bottom: 1px solid var(--muted); z-index: 100; }
+.nav-inner { max-width: 1100px; margin: 0 auto; padding: 14px 24px; display: flex; justify-content: space-between; align-items: center; }
+.nav-logo { font-weight: 700; font-size: 1.1rem; color: var(--primary); }
+.nav-links a { margin-left: 20px; text-decoration: none; color: var(--dark); font-size: 0.9rem; font-weight: 500; }
+.nav-links a:hover { color: var(--primary); }
+
+/* HERO */
+.hero { text-align: center; padding: 80px 24px 60px; }
+.hero h1 { font-size: 2.8rem; font-weight: 700; color: var(--primary); margin-bottom: 12px; }
+.hero p { font-size: 1.1rem; color: var(--dark); opacity: 0.7; margin-bottom: 28px; }
+
+/* CTA */
+.btn-cta { display: inline-block; background: var(--accent); color: #fff; padding: 12px 28px; border-radius: 8px; text-decoration: none; font-weight: 600; border: none; cursor: pointer; font-size: 0.95rem; transition: opacity 0.2s; }
+.btn-cta:hover { opacity: 0.85; }
+
+/* SECTIONS */
+.section { max-width: 1100px; margin: 0 auto; padding: 50px 24px; }
+.section h2 { font-size: 1.8rem; margin-bottom: 24px; color: var(--primary); }
+.sub-heading { margin: 32px 0 16px; font-size: 1.2rem; }
+
+/* CARDS */
+.card { background: var(--secondary); border-radius: var(--radius); padding: 24px; box-shadow: var(--shadow); margin-bottom: 16px; }
+.card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
+.product-card h3 { margin-bottom: 6px; }
+.tag { display: inline-block; background: var(--muted); padding: 2px 10px; border-radius: 20px; font-size: 0.78rem; font-weight: 500; margin-bottom: 10px; }
+
+/* ROUTINE GRID */
+.routine-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
+.routine-grid ol, .routine-grid ul { padding-left: 20px; font-size: 0.92rem; }
+.routine-grid li { margin-bottom: 6px; }
+
+/* ACCORDION */
+.accordion { margin-top: 16px; }
+.acc-item { border: 1px solid var(--muted); border-radius: var(--radius); margin-bottom: 8px; overflow: hidden; }
+.acc-btn { width: 100%; text-align: left; padding: 16px 20px; background: var(--secondary); border: none; font-size: 1rem; font-weight: 600; cursor: pointer; color: var(--dark); }
+.acc-btn:hover { background: var(--muted); }
+.acc-content { padding: 0 20px; max-height: 0; overflow: hidden; transition: max-height 0.3s ease, padding 0.3s ease; }
+.acc-item.active .acc-content { max-height: 2000px; padding: 16px 20px; }
+.acc-item.active .acc-btn { border-bottom: 1px solid var(--muted); }
+
+/* TABLES */
+.dos-table { width: 100%; border-collapse: collapse; font-size: 0.88rem; margin: 12px 0; }
+.dos-table th { background: var(--muted); padding: 8px 12px; text-align: left; }
+.dos-table td { padding: 8px 12px; border-bottom: 1px solid var(--muted); }
+
+/* DIET */
+.diet-mechanism { background: var(--muted); padding: 12px 16px; border-radius: 8px; margin-bottom: 20px; font-size: 0.88rem; }
+.diet-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; }
+.eat-card { border-left: 4px solid var(--primary); }
+.avoid-card { border-left: 4px solid var(--accent); }
+.diet-grid ul { padding-left: 18px; font-size: 0.9rem; }
+.diet-grid li { margin-bottom: 8px; }
+
+/* TRACKER */
+.tracker-card { max-width: 650px; }
+.form-row { display: flex; flex-wrap: wrap; gap: 16px; margin-bottom: 16px; }
+.form-row label { display: flex; flex-direction: column; font-size: 0.85rem; font-weight: 500; gap: 4px; flex: 1; min-width: 150px; }
+.form-row input[type="text"], .form-row input[type="number"], .form-row input[type="date"], .form-row select, .form-row textarea { padding: 10px; border: 1px solid var(--muted); border-radius: 8px; font-family: inherit; font-size: 0.9rem; }
+.form-row input[type="range"] { width: 100%; }
+
+/* CHIPS */
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chips input[type="checkbox"] { display: none; }
+.chips label { padding: 6px 14px; border-radius: 20px; background: var(--muted); font-size: 0.82rem; cursor: pointer; transition: background 0.2s; }
+.chips input:checked + label { background: var(--primary); color: #fff; }
+
+/* WATER */
+.water-section { margin: 20px 0; padding: 16px; background: var(--light); border-radius: var(--radius); }
+.water-glasses { display: flex; gap: 6px; flex-wrap: wrap; margin: 10px 0; }
+.glass { font-size: 1.8rem; background: none; border: 2px solid var(--muted); border-radius: 8px; cursor: pointer; padding: 4px 6px; transition: all 0.2s; }
+.glass.filled { border-color: var(--primary); background: var(--muted); }
+.water-count { font-weight: 600; font-size: 0.9rem; }
+.water-streak { font-size: 0.82rem; color: var(--primary); }
+
+/* HISTORY */
+.history-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+.history-table th { background: var(--muted); padding: 8px; text-align: left; }
+.history-table td { padding: 8px; border-bottom: 1px solid var(--muted); }
+
+/* PHOTOS */
+.photo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 12px; margin-top: 16px; }
+.photo-item { position: relative; }
+.photo-item img { width: 100%; border-radius: var(--radius); border: 1px solid var(--muted); }
+.photo-item span { position: absolute; bottom: 6px; left: 6px; background: rgba(0,0,0,0.6); color: #fff; padding: 2px 8px; border-radius: 4px; font-size: 0.72rem; }
+
+/* MISC */
+.muted { color: var(--dark); opacity: 0.6; font-size: 0.9rem; }
+.footer { text-align: center; padding: 40px 24px; font-size: 0.82rem; opacity: 0.6; }
+
+/* RESPONSIVE */
+@media (max-width: 700px) {
+  .hero h1 { font-size: 2rem; }
+  .nav-links { display: none; }
+  .form-row { flex-direction: column; }
+}   
+.photo-delete {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  background: rgba(0,0,0,0.6);
+  color: #fff;
+  border: none;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  font-size: 0.75rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
+}
+.photo-delete:hover {
+  background: var(--accent);
+}   
+.entry-delete {
+  background: none;
+  border: none;
+  color: var(--accent);
+  font-size: 0.9rem;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: background 0.2s;
+}
+.entry-delete:hover {
+  background: rgba(232, 131, 107, 0.15);
+}  
+/* COMPARE MODAL */
+.compare-modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.85);
+  z-index: 999;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+.compare-modal.active {
+  display: flex;
+}
+.compare-inner {
+  background: var(--light);
+  border-radius: var(--radius);
+  padding: 24px;
+  max-width: 95vw;
+  width: 95vw;
+  max-height: 95vh;
+  overflow-y: auto;
+  position: relative;
+}
+.compare-close {
+  position: absolute;
+  top: 12px;
+  right: 16px;
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: var(--dark);
+  z-index: 10;
+}
+.compare-inner h3 {
+  margin-bottom: 16px;
+  color: var(--primary);
+}
+.compare-selects {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+.compare-selects select {
+  flex: 1;
+  padding: 12px;
+  border: 1px solid var(--muted);
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 0.95rem;
+}
+.compare-vs {
+  font-weight: 700;
+  color: var(--accent);
+  font-size: 1.1rem;
+}
+.compare-view {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+.compare-img-box img {
+  width: 100%;
+  height: 65vh;
+  object-fit: contain;
+  border-radius: 8px;
+  border: 1px solid var(--muted);
+  background: #1a1a1a;
+}
+.compare-img-box p {
+  text-align: center;
+  font-size: 0.9rem;
+  margin-top: 8px;
+  color: var(--dark);
+  font-weight: 500;
+}
+
+@media (max-width: 600px) {
+  .compare-view {
+    grid-template-columns: 1fr;
+  }
+  .compare-img-box img {
+    height: 40vh;
+  }
+}    
+.photo-upload-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.photo-upload-row input[type="date"] {
+  padding: 10px;
+  border: 1px solid var(--muted);
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 0.9rem;
+}
+.photo-edit-date {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  background: rgba(0,0,0,0.6);
+  color: #fff;
+  border: none;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  font-size: 0.75rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
+}
+.photo-edit-date:hover {
+  background: var(--primary);
+}      
+</style>
+<script>
+    // ===== INIT =====
+const today = new Date().toISOString().split('T')[0];
+document.getElementById('tDate').value = today;
+document.getElementById('todayDate').textContent = new Date().toLocaleDateString('en-IN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+
+// ===== ACCORDION =====
+document.querySelectorAll('.acc-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    btn.parentElement.classList.toggle('active');
+  });
+});
+
+// ===== SLIDER LABELS =====
+const oilRange = document.getElementById('tOil');
+const oilVal = document.getElementById('oilVal');
+oilRange.addEventListener('input', () => oilVal.textContent = oilRange.value);
+
+const stressRange = document.getElementById('tStress');
+const stressVal = document.getElementById('stressVal');
+stressRange.addEventListener('input', () => stressVal.textContent = stressRange.value);
+
+// ===== WATER TRACKER =====
+let waterCount = 0;
+
+function getWaterKey() {
+  return new Date().toISOString().split('T')[0];
+}
+
+function loadWater() {
+  const log = JSON.parse(localStorage.getItem('waterLog') || '{}');
+  waterCount = log[getWaterKey()] || 0;
+  renderWater();
+  renderStreak();
+}
+
+function saveWater() {
+  const log = JSON.parse(localStorage.getItem('waterLog') || '{}');
+  log[getWaterKey()] = waterCount;
+  localStorage.setItem('waterLog', JSON.stringify(log));
+}
+
+function renderWater() {
+  document.querySelectorAll('.glass').forEach((g, i) => {
+    g.classList.toggle('filled', i < waterCount);
+  });
+  document.getElementById('waterCount').textContent = waterCount;
+}
+
+function renderStreak() {
+  const log = JSON.parse(localStorage.getItem('waterLog') || '{}');
+  let streak = 0;
+  let d = new Date();
+  while (true) {
+    const key = d.toISOString().split('T')[0];
+    if ((log[key] || 0) >= 8) { streak++; d.setDate(d.getDate() - 1); }
+    else break;
+  }
+  document.getElementById('waterStreak').textContent = streak > 0 ? `🔥 ${streak}-day streak!` : '';
+}
+
+document.querySelectorAll('.glass').forEach(g => {
+  g.addEventListener('click', () => {
+    const i = parseInt(g.dataset.i);
+    if (i === waterCount + 1) waterCount = i;
+    else if (i <= waterCount) waterCount = i - 1;
+    else waterCount = i;
+    saveWater();
+    renderWater();
+    renderStreak();
+  });
+});
+
+loadWater();
+
+// ===== TRACKER SAVE =====
+document.getElementById('trackerForm').addEventListener('submit', (e) => {
+  e.preventDefault();
+  const locations = [...document.querySelectorAll('#tLocations input:checked')].map(c => c.value);
+  const entry = {
+    date: document.getElementById('tDate').value,
+    oiliness: parseInt(oilRange.value),
+    breakouts: document.getElementById('tBreakouts').value,
+    locations,
+    products: document.getElementById('tProducts').value,
+    sleep: parseFloat(document.getElementById('tSleep').value),
+    stress: parseInt(stressRange.value),
+    water: waterCount,
+    notes: document.getElementById('tNotes').value
+  };
+
+  let entries = JSON.parse(localStorage.getItem('entries') || '[]');
+  // Replace if same date exists
+  entries = entries.filter(en => en.date !== entry.date);
+  entries.push(entry);
+  entries.sort((a, b) => a.date.localeCompare(b.date));
+  localStorage.setItem('entries', JSON.stringify(entries));
+
+  alert('Entry saved! ✅');
+  renderHistory();
+  renderCharts();
+});
+
+// ===== HISTORY TABLE =====
+function renderHistory() {
+  const entries = JSON.parse(localStorage.getItem('entries') || '[]');
+  const tbody = document.getElementById('historyBody');
+  tbody.innerHTML = '';
+  [...entries].reverse().forEach((en, i) => {
+    const realIdx = entries.length - 1 - i;
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${en.date}</td><td>${en.oiliness}</td><td>${en.breakouts}</td>
+      <td>${en.locations.join(', ') || '—'}</td><td>${en.water}/8</td>
+      <td>${en.notes || '—'}</td>
+      <td><button class="entry-delete" data-idx="${realIdx}">✕</button></td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  document.querySelectorAll('.entry-delete').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const idx = parseInt(e.target.dataset.idx);
+      if (!confirm('Delete this entry?')) return;
+      let entries = JSON.parse(localStorage.getItem('entries') || '[]');
+      entries.splice(idx, 1);
+      localStorage.setItem('entries', JSON.stringify(entries));
+      renderHistory();
+      renderCharts();
+    });
+  });
+}   
+
+// ===== CHARTS =====
+let oilChart, waterChart;
+
+function renderCharts() {
+  const entries = JSON.parse(localStorage.getItem('entries') || '[]');
+  const labels = entries.map(e => e.date);
+  const oilData = entries.map(e => e.oiliness);
+  const waterData = entries.slice(-7).map(e => e.water);
+  const waterLabels = entries.slice(-7).map(e => e.date);
+
+  // Oil chart
+  if (oilChart) oilChart.destroy();
+  oilChart = new Chart(document.getElementById('oilChart'), {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [{ label: 'Oiliness', data: oilData, borderColor: '#5B8A72', backgroundColor: 'rgba(91,138,114,0.1)', fill: true, tension: 0.3 }]
+    },
+    options: { plugins: { title: { display: true, text: 'Oiliness Trend' } }, scales: { y: { min: -5, max: 5 } } }
+  });
+
+  // Water chart
+  if (waterChart) waterChart.destroy();
+  waterChart = new Chart(document.getElementById('waterChart'), {
+    type: 'bar',
+    data: {
+      labels: waterLabels,
+      datasets: [{ label: 'Glasses', data: waterData, backgroundColor: '#5B8A72' }]
+    },
+    options: { plugins: { title: { display: true, text: 'Water (Last 7 Days)' } }, scales: { y: { max: 8 } } }
+  });
+}
+
+renderHistory();
+renderCharts();
+
+// ===== PHOTOS =====
+// Set default date on load
+document.getElementById('photoDate').value = new Date().toISOString().split('T')[0];
+
+function savePhoto() {
+  const input = document.getElementById('photoInput');
+  if (!input.files[0]) return alert('Select a photo first.');
+  const date = document.getElementById('photoDate').value;
+  if (!date) return alert('Set a date first.');
+
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    let photos = JSON.parse(localStorage.getItem('photos') || '[]');
+    // Replace if same date exists
+    photos = photos.filter(p => p.date !== date);
+    photos.push({ date, data: e.target.result });
+    photos.sort((a, b) => a.date.localeCompare(b.date));
+    localStorage.setItem('photos', JSON.stringify(photos));
+    renderPhotos();
+  };
+  reader.readAsDataURL(input.files[0]);
+}
+
+function renderPhotos() {
+  const photos = JSON.parse(localStorage.getItem('photos') || '[]');
+  const grid = document.getElementById('photoGrid');
+  grid.innerHTML = '';
+  photos.forEach((p, i) => {
+    const div = document.createElement('div');
+    div.className = 'photo-item';
+    div.innerHTML = `
+      <img src="${p.data}" />
+      <span>${p.date}</span>
+      <button class="photo-delete" data-idx="${i}">✕</button>
+      <button class="photo-edit-date" data-idx="${i}">📅</button>
+    `;
+    grid.appendChild(div);
+  });
+
+  document.querySelectorAll('.photo-delete').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const idx = parseInt(e.target.dataset.idx);
+      if (!confirm('Delete this photo?')) return;
+      let photos = JSON.parse(localStorage.getItem('photos') || '[]');
+      photos.splice(idx, 1);
+      localStorage.setItem('photos', JSON.stringify(photos));
+      renderPhotos();
+    });
+  });
+
+  document.querySelectorAll('.photo-edit-date').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const idx = parseInt(e.target.dataset.idx);
+      let photos = JSON.parse(localStorage.getItem('photos') || '[]');
+      const newDate = prompt('New date (YYYY-MM-DD):', photos[idx].date);
+      if (!newDate || isNaN(Date.parse(newDate))) return;
+      photos[idx].date = newDate;
+      photos.sort((a, b) => a.date.localeCompare(b.date));
+      localStorage.setItem('photos', JSON.stringify(photos));
+      renderPhotos();
+    });
+  });
+}   
+// ===== COMPARE =====
+function openCompare() {
+  const photos = JSON.parse(localStorage.getItem('photos') || '[]');
+  if (photos.length < 2) return alert('Need at least 2 photos to compare.');
+
+  const selA = document.getElementById('compareA');
+  const selB = document.getElementById('compareB');
+  selA.innerHTML = '';
+  selB.innerHTML = '';
+
+  photos.forEach((p, i) => {
+    selA.innerHTML += `<option value="${i}">${p.date}</option>`;
+    selB.innerHTML += `<option value="${i}">${p.date}</option>`;
+  });
+
+  // Default: oldest vs newest
+  selA.value = 0;
+  selB.value = photos.length - 1;
+
+  updateCompare();
+  document.getElementById('compareModal').classList.add('active');
+}
+
+function closeCompare() {
+  document.getElementById('compareModal').classList.remove('active');
+}
+
+function updateCompare() {
+  const photos = JSON.parse(localStorage.getItem('photos') || '[]');
+  const a = parseInt(document.getElementById('compareA').value);
+  const b = parseInt(document.getElementById('compareB').value);
+
+  document.getElementById('compareImgA').src = photos[a].data;
+  document.getElementById('compareDateA').textContent = photos[a].date;
+  document.getElementById('compareImgB').src = photos[b].data;
+  document.getElementById('compareDateB').textContent = photos[b].date;
+}
+
+document.getElementById('compareA').addEventListener('change', updateCompare);
+document.getElementById('compareB').addEventListener('change', updateCompare);
+
+// Close on backdrop click
+document.getElementById('compareModal').addEventListener('click', (e) => {
+  if (e.target === e.currentTarget) closeCompare();
+});   
+</script>
+</html>   
