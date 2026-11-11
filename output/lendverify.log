@@ -387022,3 +387022,246 @@ z3.z3types.Z3Exception: b'parser error'
 2026-11-10 13:22:21,876 | INFO | Pipeline model done: Random Forest (test rows=8146)
 2026-11-10 13:22:21,905 | INFO | Pipeline model done: XGBoost (test rows=8146)
 2026-11-10 13:22:21,918 | INFO | Pipeline model done: Decision Tree (test rows=8146)
+2026-11-10 16:51:36,081 | INFO | Pipeline model done: Random Forest (test rows=8146)
+2026-11-10 16:51:36,111 | INFO | Pipeline model done: XGBoost (test rows=8146)
+2026-11-10 16:51:36,124 | INFO | Pipeline model done: Decision Tree (test rows=8146)
+2026-11-10 16:51:39,864 | ERROR | Z3 evaluation failed for valid_interest_rate with inputs ('16.02',)
+Traceback (most recent call last):
+  File "/Users/sukrit/Documents/GitHub/SMT/app.py", line 517, in _check_policy
+    for binding in bindings_builder():
+                   ~~~~~~~~~~~~~~~~^^
+  File "/Users/sukrit/Documents/GitHub/SMT/app.py", line 623, in <lambda>
+    lambda: (self.rate == RealVal(rt_s),),
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/sukrit/Desktop/SMT/venv/lib/python3.15/site-packages/z3/z3.py", line 1076, in __eq__
+    a, b = _coerce_exprs(self, other)
+           ~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/Users/sukrit/Desktop/SMT/venv/lib/python3.15/site-packages/z3/z3.py", line 1330, in _coerce_exprs
+    s = _coerce_expr_merge(s, b)
+  File "/Users/sukrit/Desktop/SMT/venv/lib/python3.15/site-packages/z3/z3.py", line 1295, in _coerce_expr_merge
+    _z3_assert(False, "sort mismatch")
+    ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/sukrit/Desktop/SMT/venv/lib/python3.15/site-packages/z3/z3.py", line 115, in _z3_assert
+    raise Z3Exception(msg)
+z3.z3types.Z3Exception: sort mismatch
+2026-11-10 16:51:39,874 | ERROR | Z3 evaluation failed for positive_income_and_loan with inputs ('70000', '3200')
+Traceback (most recent call last):
+  File "/Users/sukrit/Documents/GitHub/SMT/app.py", line 517, in _check_policy
+    for binding in bindings_builder():
+                   ~~~~~~~~~~~~~~~~^^
+  File "/Users/sukrit/Documents/GitHub/SMT/app.py", line 605, in <lambda>
+    lambda: (self.income == RealVal(inc_s), self.amount == RealVal(amt_s)),
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/sukrit/Desktop/SMT/venv/lib/python3.15/site-packages/z3/z3.py", line 1076, in __eq__
+    a, b = _coerce_exprs(self, other)
+           ~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/Users/sukrit/Desktop/SMT/venv/lib/python3.15/site-packages/z3/z3.py", line 1329, in _coerce_exprs
+    s = _coerce_expr_merge(s, a)
+  File "/Users/sukrit/Desktop/SMT/venv/lib/python3.15/site-packages/z3/z3.py", line 1283, in _coerce_expr_merge
+    s1 = a.sort()
+  File "/Users/sukrit/Desktop/SMT/venv/lib/python3.15/site-packages/z3/z3.py", line 2544, in sort
+    return ArithSortRef(Z3_get_sort(self.ctx_ref(), self.as_ast()), self.ctx)
+                        ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/sukrit/Desktop/SMT/venv/lib/python3.15/site-packages/z3/z3core.py", line 3319, in Z3_get_sort
+    _elems.Check(a0)
+    ~~~~~~~~~~~~^^^^
+  File "/Users/sukrit/Desktop/SMT/venv/lib/python3.15/site-packages/z3/z3core.py", line 1643, in Check
+    raise self.Exception(self.get_error_message(ctx, err))
+z3.z3types.Z3Exception: b'unreachable'
+2026-11-10 16:51:39,874 | ERROR | Z3 evaluation failed for employment_history_bounds with inputs ('21', '5.0')
+Traceback (most recent call last):
+  File "/Users/sukrit/Documents/GitHub/SMT/app.py", line 520, in _check_policy
+    result = self.solver.check()
+  File "/Users/sukrit/Desktop/SMT/venv/lib/python3.15/site-packages/z3/z3.py", line 7779, in check
+    r = Z3_solver_check_assumptions(self.ctx.ref(), self.solver, num, _assumptions)
+  File "/Users/sukrit/Desktop/SMT/venv/lib/python3.15/site-packages/z3/z3core.py", line 4512, in Z3_solver_check_assumptions
+    _elems.Check(a0)
+    ~~~~~~~~~~~~^^^^
+  File "/Users/sukrit/Desktop/SMT/venv/lib/python3.15/site-packages/z3/z3core.py", line 1643, in Check
+    raise self.Exception(self.get_error_message(ctx, err))
+z3.z3types.Z3Exception: b'unreachable'
+2026-11-10 16:51:39,876 | ERROR | Z3 evaluation failed for positive_income_and_loan with inputs ('70000', '9800')
+Traceback (most recent call last):
+  File "/Users/sukrit/Documents/GitHub/SMT/app.py", line 517, in _check_policy
+    for binding in bindings_builder():
+                   ~~~~~~~~~~~~~~~~^^
+  File "/Users/sukrit/Documents/GitHub/SMT/app.py", line 605, in <lambda>
+    lambda: (self.income == RealVal(inc_s), self.amount == RealVal(amt_s)),
+                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/sukrit/Desktop/SMT/venv/lib/python3.15/site-packages/z3/z3.py", line 1076, in __eq__
+    a, b = _coerce_exprs(self, other)
+           ~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/Users/sukrit/Desktop/SMT/venv/lib/python3.15/site-packages/z3/z3.py", line 1330, in _coerce_exprs
+    s = _coerce_expr_merge(s, b)
+  File "/Users/sukrit/Desktop/SMT/venv/lib/python3.15/site-packages/z3/z3.py", line 1295, in _coerce_expr_merge
+    _z3_assert(False, "sort mismatch")
+    ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/sukrit/Desktop/SMT/venv/lib/python3.15/site-packages/z3/z3.py", line 115, in _z3_assert
+    raise Z3Exception(msg)
+z3.z3types.Z3Exception: sort mismatch
+2026-11-10 16:51:39,876 | ERROR | Z3 evaluation failed for positive_income_and_loan with inputs ('9600', '5500')
+Traceback (most recent call last):
+  File "/Users/sukrit/Documents/GitHub/SMT/app.py", line 517, in _check_policy
+    for binding in bindings_builder():
+                   ~~~~~~~~~~~~~~~~^^
+  File "/Users/sukrit/Documents/GitHub/SMT/app.py", line 605, in <lambda>
+    lambda: (self.income == RealVal(inc_s), self.amount == RealVal(amt_s)),
+                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/sukrit/Desktop/SMT/venv/lib/python3.15/site-packages/z3/z3.py", line 1076, in __eq__
+    a, b = _coerce_exprs(self, other)
+           ~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/Users/sukrit/Desktop/SMT/venv/lib/python3.15/site-packages/z3/z3.py", line 1330, in _coerce_exprs
+    s = _coerce_expr_merge(s, b)
+  File "/Users/sukrit/Desktop/SMT/venv/lib/python3.15/site-packages/z3/z3.py", line 1295, in _coerce_expr_merge
+    _z3_assert(False, "sort mismatch")
+    ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/sukrit/Desktop/SMT/venv/lib/python3.15/site-packages/z3/z3.py", line 115, in _z3_assert
+    raise Z3Exception(msg)
+z3.z3types.Z3Exception: sort mismatch
+2026-11-10 16:51:39,877 | ERROR | Z3 evaluation failed for positive_income_and_loan with inputs ('70000', '12800')
+Traceback (most recent call last):
+  File "/Users/sukrit/Documents/GitHub/SMT/app.py", line 517, in _check_policy
+    for binding in bindings_builder():
+                   ~~~~~~~~~~~~~~~~^^
+  File "/Users/sukrit/Documents/GitHub/SMT/app.py", line 605, in <lambda>
+    lambda: (self.income == RealVal(inc_s), self.amount == RealVal(amt_s)),
+                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/sukrit/Desktop/SMT/venv/lib/python3.15/site-packages/z3/z3.py", line 1076, in __eq__
+    a, b = _coerce_exprs(self, other)
+           ~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/Users/sukrit/Desktop/SMT/venv/lib/python3.15/site-packages/z3/z3.py", line 1330, in _coerce_exprs
+    s = _coerce_expr_merge(s, b)
+  File "/Users/sukrit/Desktop/SMT/venv/lib/python3.15/site-packages/z3/z3.py", line 1295, in _coerce_expr_merge
+    _z3_assert(False, "sort mismatch")
+    ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/sukrit/Desktop/SMT/venv/lib/python3.15/site-packages/z3/z3.py", line 115, in _z3_assert
+    raise Z3Exception(msg)
+z3.z3types.Z3Exception: sort mismatch
+2026-11-10 16:51:39,878 | ERROR | Z3 evaluation failed for positive_income_and_loan with inputs ('23000', '4325')
+Traceback (most recent call last):
+  File "/Users/sukrit/Documents/GitHub/SMT/app.py", line 517, in _check_policy
+    for binding in bindings_builder():
+                   ~~~~~~~~~~~~~~~~^^
+  File "/Users/sukrit/Documents/GitHub/SMT/app.py", line 605, in <lambda>
+    lambda: (self.income == RealVal(inc_s), self.amount == RealVal(amt_s)),
+                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/sukrit/Desktop/SMT/venv/lib/python3.15/site-packages/z3/z3.py", line 1076, in __eq__
+    a, b = _coerce_exprs(self, other)
+           ~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/Users/sukrit/Desktop/SMT/venv/lib/python3.15/site-packages/z3/z3.py", line 1330, in _coerce_exprs
+    s = _coerce_expr_merge(s, b)
+  File "/Users/sukrit/Desktop/SMT/venv/lib/python3.15/site-packages/z3/z3.py", line 1295, in _coerce_expr_merge
+    _z3_assert(False, "sort mismatch")
+    ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/sukrit/Desktop/SMT/venv/lib/python3.15/site-packages/z3/z3.py", line 115, in _z3_assert
+    raise Z3Exception(msg)
+z3.z3types.Z3Exception: sort mismatch
+2026-11-10 16:51:39,878 | ERROR | Z3 evaluation failed for income_ratio_limit with inputs ('0.57',)
+Traceback (most recent call last):
+  File "/Users/sukrit/Documents/GitHub/SMT/app.py", line 517, in _check_policy
+    for binding in bindings_builder():
+                   ~~~~~~~~~~~~~~~~^^
+  File "/Users/sukrit/Documents/GitHub/SMT/app.py", line 614, in <lambda>
+    lambda: (self.ratio == RealVal(rat_s),),
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/sukrit/Desktop/SMT/venv/lib/python3.15/site-packages/z3/z3.py", line 1076, in __eq__
+    a, b = _coerce_exprs(self, other)
+           ~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/Users/sukrit/Desktop/SMT/venv/lib/python3.15/site-packages/z3/z3.py", line 1325, in _coerce_exprs
+    if _check_same_sort(a, b, ctx):
+       ~~~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "/Users/sukrit/Desktop/SMT/venv/lib/python3.15/site-packages/z3/z3.py", line 1307, in _check_same_sort
+    a_sort = Z3_get_sort(ctx.ctx, a.ast)
+  File "/Users/sukrit/Desktop/SMT/venv/lib/python3.15/site-packages/z3/z3core.py", line 3319, in Z3_get_sort
+    _elems.Check(a0)
+    ~~~~~~~~~~~~^^^^
+  File "/Users/sukrit/Desktop/SMT/venv/lib/python3.15/site-packages/z3/z3core.py", line 1643, in Check
+    raise self.Exception(self.get_error_message(ctx, err))
+z3.z3types.Z3Exception: b'unreachable'
+2026-11-10 16:51:39,878 | ERROR | Z3 evaluation failed for positive_income_and_loan with inputs ('48000', '4325')
+Traceback (most recent call last):
+  File "/Users/sukrit/Documents/GitHub/SMT/app.py", line 517, in _check_policy
+    for binding in bindings_builder():
+                   ~~~~~~~~~~~~~~~~^^
+  File "/Users/sukrit/Documents/GitHub/SMT/app.py", line 605, in <lambda>
+    lambda: (self.income == RealVal(inc_s), self.amount == RealVal(amt_s)),
+                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/sukrit/Desktop/SMT/venv/lib/python3.15/site-packages/z3/z3.py", line 1076, in __eq__
+    a, b = _coerce_exprs(self, other)
+           ~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/Users/sukrit/Desktop/SMT/venv/lib/python3.15/site-packages/z3/z3.py", line 1330, in _coerce_exprs
+    s = _coerce_expr_merge(s, b)
+  File "/Users/sukrit/Desktop/SMT/venv/lib/python3.15/site-packages/z3/z3.py", line 1295, in _coerce_expr_merge
+    _z3_assert(False, "sort mismatch")
+    ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/sukrit/Desktop/SMT/venv/lib/python3.15/site-packages/z3/z3.py", line 115, in _z3_assert
+    raise Z3Exception(msg)
+z3.z3types.Z3Exception: sort mismatch
+2026-11-10 16:51:39,879 | ERROR | Z3 evaluation failed for positive_income_and_loan with inputs ('23000', '4300')
+Traceback (most recent call last):
+  File "/Users/sukrit/Documents/GitHub/SMT/app.py", line 517, in _check_policy
+    for binding in bindings_builder():
+                   ~~~~~~~~~~~~~~~~^^
+  File "/Users/sukrit/Documents/GitHub/SMT/app.py", line 605, in <lambda>
+    lambda: (self.income == RealVal(inc_s), self.amount == RealVal(amt_s)),
+                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/sukrit/Desktop/SMT/venv/lib/python3.15/site-packages/z3/z3.py", line 1076, in __eq__
+    a, b = _coerce_exprs(self, other)
+           ~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/Users/sukrit/Desktop/SMT/venv/lib/python3.15/site-packages/z3/z3.py", line 1330, in _coerce_exprs
+    s = _coerce_expr_merge(s, b)
+  File "/Users/sukrit/Desktop/SMT/venv/lib/python3.15/site-packages/z3/z3.py", line 1295, in _coerce_expr_merge
+    _z3_assert(False, "sort mismatch")
+    ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/sukrit/Desktop/SMT/venv/lib/python3.15/site-packages/z3/z3.py", line 115, in _z3_assert
+    raise Z3Exception(msg)
+z3.z3types.Z3Exception: sort mismatch
+2026-11-10 16:51:55,135 | INFO | Pipeline model done: Random Forest (test rows=8146)
+2026-11-10 16:51:55,166 | INFO | Pipeline model done: XGBoost (test rows=8146)
+2026-11-10 16:51:55,179 | INFO | Pipeline model done: Decision Tree (test rows=8146)
+2026-11-11 10:52:18,268 | INFO | Pipeline model done: Random Forest (test rows=8146)
+2026-11-11 10:52:18,299 | INFO | Pipeline model done: XGBoost (test rows=8146)
+2026-11-11 10:52:18,312 | INFO | Pipeline model done: Decision Tree (test rows=8146)
+2026-11-11 10:52:19,374 | INFO | Pipeline model done: Random Forest (test rows=8146)
+2026-11-11 10:52:19,404 | INFO | Pipeline model done: XGBoost (test rows=8146)
+2026-11-11 10:52:19,417 | INFO | Pipeline model done: Decision Tree (test rows=8146)
+2026-11-11 10:54:22,146 | ERROR | Z3 evaluation failed for valid_interest_rate with inputs ('15.23',)
+Traceback (most recent call last):
+  File "/Users/sukrit/Documents/GitHub/SMT/app.py", line 518, in _check_policy
+    self.solver.add(binding)
+    ~~~~~~~~~~~~~~~^^^^^^^^^
+  File "/Users/sukrit/Desktop/SMT/venv/lib/python3.15/site-packages/z3/z3.py", line 7695, in add
+    self.assert_exprs(*args)
+    ~~~~~~~~~~~~~~~~~^^^^^^^
+  File "/Users/sukrit/Desktop/SMT/venv/lib/python3.15/site-packages/z3/z3.py", line 7683, in assert_exprs
+    arg = s.cast(arg)
+  File "/Users/sukrit/Desktop/SMT/venv/lib/python3.15/site-packages/z3/z3.py", line 1650, in cast
+    if not self.eq(val.sort()):
+                   ~~~~~~~~^^
+  File "/Users/sukrit/Desktop/SMT/venv/lib/python3.15/site-packages/z3/z3.py", line 1668, in sort
+    return BoolSortRef(Z3_get_sort(self.ctx_ref(), self.as_ast()), self.ctx)
+                       ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/sukrit/Desktop/SMT/venv/lib/python3.15/site-packages/z3/z3core.py", line 3319, in Z3_get_sort
+    _elems.Check(a0)
+    ~~~~~~~~~~~~^^^^
+  File "/Users/sukrit/Desktop/SMT/venv/lib/python3.15/site-packages/z3/z3core.py", line 1643, in Check
+    raise self.Exception(self.get_error_message(ctx, err))
+z3.z3types.Z3Exception: b'unreachable'
+2026-11-11 10:54:22,146 | ERROR | Z3 evaluation failed for positive_income_and_loan with inputs ('55500', '10000')
+Traceback (most recent call last):
+  File "/Users/sukrit/Documents/GitHub/SMT/app.py", line 520, in _check_policy
+    result = self.solver.check()
+  File "/Users/sukrit/Desktop/SMT/venv/lib/python3.15/site-packages/z3/z3.py", line 7779, in check
+    r = Z3_solver_check_assumptions(self.ctx.ref(), self.solver, num, _assumptions)
+  File "/Users/sukrit/Desktop/SMT/venv/lib/python3.15/site-packages/z3/z3core.py", line 4512, in Z3_solver_check_assumptions
+    _elems.Check(a0)
+    ~~~~~~~~~~~~^^^^
+  File "/Users/sukrit/Desktop/SMT/venv/lib/python3.15/site-packages/z3/z3core.py", line 1643, in Check
+    raise self.Exception(self.get_error_message(ctx, err))
+z3.z3types.Z3Exception: b'unreachable'
+2026-11-11 10:56:10,823 | INFO | Pipeline model done: Random Forest (test rows=8146)
+2026-11-11 10:56:10,852 | INFO | Pipeline model done: XGBoost (test rows=8146)
+2026-11-11 10:56:10,865 | INFO | Pipeline model done: Decision Tree (test rows=8146)
+2026-11-11 11:08:19,766 | INFO | Pipeline model done: Random Forest (test rows=8146)
+2026-11-11 11:08:19,797 | INFO | Pipeline model done: XGBoost (test rows=8146)
+2026-11-11 11:08:19,809 | INFO | Pipeline model done: Decision Tree (test rows=8146)
