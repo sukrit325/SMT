@@ -1,6 +1,6 @@
 LENDVERIFY - Z3 POLICY VERIFICATION REPORT
 =================================================================
-Generated: 2026-11-11T11:10:41.035599
+Generated: 2026-11-11T12:43:01.269915
 Dataset: /Users/sukrit/Documents/GitHub/SMT/borrowers.csv
 Total borrowers evaluated: 32581
 

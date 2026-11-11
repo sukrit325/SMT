@@ -29,6 +29,7 @@ from sklearn.tree import DecisionTreeClassifier, export_text
 try:
     from z3 import (
         And,
+        Context,
         Real,
         RealVal,
         Solver,
@@ -49,6 +50,7 @@ pd.set_option("styler.render.max_elements", 1_000_000)
 BASE_DIR = Path(__file__).resolve().parent
 DATA_PATH = BASE_DIR / "borrowers.csv"
 COMBINED_PATH = BASE_DIR / "models" / "combined_models.pkl"
+Z3_PKL_PATH = BASE_DIR / "models" / "z3_results.pkl"
 OUTPUT_DIR = BASE_DIR / "output"
 Z3_PATH = OUTPUT_DIR / "z3_verification_report.txt"
 LOG_PATH = OUTPUT_DIR / "lendverify.log"
@@ -450,47 +452,49 @@ def _parse_real_value(value: Any) -> tuple[str | None, str | None]:
 
 
 class _Z3PolicyVerifier:
-    """Reusable Z3 solver and per-run memoizer for the six illustrative policies."""
+    """Reusable thread-isolated Z3 solver and per-run memoizer for the six policies."""
 
     def __init__(self) -> None:
         self.errors: list[str] = []
         self._memo: dict[tuple[Any, ...], str] = {}
+        self.ctx = Context() if Z3_AVAILABLE else None
         self.solver = self._new_solver() if Z3_AVAILABLE else None
 
-        if Z3_AVAILABLE:
-            self.zero = RealVal(0)
-            self.eighteen = RealVal(18)
-            self.hundred = RealVal(100)
-            self.max_ratio = RealVal(str(MAX_LOAN_PERCENT_INCOME))
+        if Z3_AVAILABLE and self.ctx is not None:
+            self.zero = RealVal(0, ctx=self.ctx)
+            self.eighteen = RealVal(18, ctx=self.ctx)
+            self.hundred = RealVal(100, ctx=self.ctx)
+            self.max_ratio = RealVal(str(MAX_LOAN_PERCENT_INCOME), ctx=self.ctx)
 
-            self.age = Real("age")
-            self.income = Real("income")
-            self.amount = Real("amount")
-            self.ratio = Real("ratio")
-            self.rate = Real("rate")
-            self.employment = Real("employment")
-            self.history = Real("history")
+            self.age = Real("age", ctx=self.ctx)
+            self.income = Real("income", ctx=self.ctx)
+            self.amount = Real("amount", ctx=self.ctx)
+            self.ratio = Real("ratio", ctx=self.ctx)
+            self.rate = Real("rate", ctx=self.ctx)
+            self.employment = Real("employment", ctx=self.ctx)
+            self.history = Real("history", ctx=self.ctx)
 
             self.exprs = {
                 "adult_eligibility": self.age >= self.eighteen,
-                "positive_income_and_loan": And(self.income > self.zero, self.amount > self.zero),
-                "income_ratio_limit": And(self.ratio >= self.zero, self.ratio <= self.max_ratio),
-                "valid_interest_rate": And(self.rate >= self.zero, self.rate <= self.hundred),
+                "positive_income_and_loan": And(self.income > self.zero, self.amount > self.zero, self.ctx),
+                "income_ratio_limit": And(self.ratio >= self.zero, self.ratio <= self.max_ratio, self.ctx),
+                "valid_interest_rate": And(self.rate >= self.zero, self.rate <= self.hundred, self.ctx),
                 "employment_history_bounds": And(
                     self.employment >= self.zero,
                     self.employment <= self.age - self.eighteen,
+                    self.ctx,
                 ),
                 "credit_history_bounds": And(
                     self.history >= self.zero,
                     self.history <= self.age - self.eighteen,
+                    self.ctx,
                 ),
             }
         else:
             self.exprs = {}
 
-    @staticmethod
-    def _new_solver():
-        solver = Solver()
+    def _new_solver(self):
+        solver = Solver(ctx=self.ctx)
         solver.set("timeout", 1000)
         return solver
 
@@ -555,7 +559,7 @@ class _Z3PolicyVerifier:
         history_raw: Any,
         borrower_label: str = "",
     ) -> dict[str, str]:
-        if not Z3_AVAILABLE:
+        if not Z3_AVAILABLE or self.ctx is None:
             return {rule: "UNVERIFIABLE" for rule in POLICY_RULES}
 
         parsed: dict[str, str | None] = {}
@@ -593,7 +597,7 @@ class _Z3PolicyVerifier:
             results["adult_eligibility"] = self._check_policy(
                 "adult_eligibility",
                 (age_s,),
-                lambda: (self.age == RealVal(age_s),),
+                lambda: (self.age == RealVal(age_s, ctx=self.ctx),),
             )
 
         if inc_s is None or amt_s is None:
@@ -602,7 +606,10 @@ class _Z3PolicyVerifier:
             results["positive_income_and_loan"] = self._check_policy(
                 "positive_income_and_loan",
                 (inc_s, amt_s),
-                lambda: (self.income == RealVal(inc_s), self.amount == RealVal(amt_s)),
+                lambda: (
+                    self.income == RealVal(inc_s, ctx=self.ctx),
+                    self.amount == RealVal(amt_s, ctx=self.ctx),
+                ),
             )
 
         if rat_s is None:
@@ -611,7 +618,7 @@ class _Z3PolicyVerifier:
             results["income_ratio_limit"] = self._check_policy(
                 "income_ratio_limit",
                 (rat_s,),
-                lambda: (self.ratio == RealVal(rat_s),),
+                lambda: (self.ratio == RealVal(rat_s, ctx=self.ctx),),
             )
 
         if rt_s is None:
@@ -620,7 +627,7 @@ class _Z3PolicyVerifier:
             results["valid_interest_rate"] = self._check_policy(
                 "valid_interest_rate",
                 (rt_s,),
-                lambda: (self.rate == RealVal(rt_s),),
+                lambda: (self.rate == RealVal(rt_s, ctx=self.ctx),),
             )
 
         if age_s is None or emp_s is None:
@@ -629,7 +636,10 @@ class _Z3PolicyVerifier:
             results["employment_history_bounds"] = self._check_policy(
                 "employment_history_bounds",
                 (age_s, emp_s),
-                lambda: (self.age == RealVal(age_s), self.employment == RealVal(emp_s)),
+                lambda: (
+                    self.age == RealVal(age_s, ctx=self.ctx),
+                    self.employment == RealVal(emp_s, ctx=self.ctx),
+                ),
             )
 
         if age_s is None or crd_s is None:
@@ -638,7 +648,10 @@ class _Z3PolicyVerifier:
             results["credit_history_bounds"] = self._check_policy(
                 "credit_history_bounds",
                 (age_s, crd_s),
-                lambda: (self.age == RealVal(age_s), self.history == RealVal(crd_s)),
+                lambda: (
+                    self.age == RealVal(age_s, ctx=self.ctx),
+                    self.history == RealVal(crd_s, ctx=self.ctx),
+                ),
             )
 
         return results
@@ -664,12 +677,19 @@ def _verify_policies_for_row(
     )
 
 
-def _compute_z3_cache_version() -> str:
-    """Hash policy definitions, Z3 version, and verification logic to bust stale caches."""
+def _compute_policy_schema_hash() -> str:
+    """Platform-independent hash of the six policy rules and definitions."""
     h = hashlib.sha256()
     h.update(repr(POLICY_RULES).encode("utf-8"))
     h.update(repr(POLICY_DEFINITIONS).encode("utf-8"))
     h.update(str(MAX_LOAN_PERCENT_INCOME).encode("utf-8"))
+    return h.hexdigest()[:16]
+
+
+def _compute_z3_cache_version() -> str:
+    """Hash policy definitions, Z3 version, and verification logic to bust stale caches."""
+    h = hashlib.sha256()
+    h.update(_compute_policy_schema_hash().encode("utf-8"))
     h.update(str(Z3_AVAILABLE).encode("utf-8"))
     if Z3_AVAILABLE:
         try:
@@ -693,7 +713,70 @@ def _file_sha256(path: Path) -> str:
     return h.hexdigest()[:16]
 
 
+@st.cache_data(show_spinner=False)
+def _cached_file_sha256(path_text: str, mtime: float) -> str:
+    _ = mtime
+    return _file_sha256(Path(path_text))
+
+
+POLICY_SCHEMA_HASH = _compute_policy_schema_hash()
 Z3_CACHE_VERSION = _compute_z3_cache_version()
+
+
+@st.cache_data(show_spinner=False)
+def load_precomputed_z3(
+    pkl_path: str,
+    pkl_mtime: float,
+    expected_data_hash: str,
+    expected_schema_hash: str,
+):
+    """Load precomputed Z3 verification bundle (.pkl) if it matches the current data and policies."""
+    _ = pkl_mtime
+    try:
+        with open(pkl_path, "rb") as f:
+            bundle = pickle.load(f)
+        if not isinstance(bundle, dict):
+            return None
+        if bundle.get("data_hash") != expected_data_hash:
+            return None
+        if bundle.get("policy_schema_hash") != expected_schema_hash:
+            return None
+        res_df = bundle.get("results_df")
+        report_text = bundle.get("report_text")
+        if not isinstance(res_df, pd.DataFrame) or res_df.empty or not isinstance(report_text, str):
+            return None
+        return res_df, report_text, bundle.get("generated_at", "")
+    except Exception:
+        logging.exception("Could not load precomputed Z3 bundle from %s", pkl_path)
+        return None
+
+
+def save_z3_bundle(
+    results_df: pd.DataFrame,
+    report_text: str,
+    data_hash: str,
+    pkl_path: Path = Z3_PKL_PATH,
+) -> None:
+    """Persist Z3 verification results + report into a portable .pkl file for deployment."""
+    z3_ver = ""
+    if Z3_AVAILABLE:
+        try:
+            z3_ver = get_version_string()
+        except Exception:
+            pass
+    bundle = {
+        "results_df": results_df,
+        "report_text": report_text,
+        "data_hash": data_hash,
+        "policy_schema_hash": POLICY_SCHEMA_HASH,
+        "policy_rules": list(POLICY_RULES),
+        "policy_definitions": dict(POLICY_DEFINITIONS),
+        "z3_version": z3_ver,
+        "generated_at": datetime.now().isoformat(),
+    }
+    pkl_path.parent.mkdir(parents=True, exist_ok=True)
+    with open(pkl_path, "wb") as f:
+        pickle.dump(bundle, f, protocol=pickle.HIGHEST_PROTOCOL)
 
 
 @st.cache_data(show_spinner=False)
@@ -897,6 +980,13 @@ def run_z3_verification(
     except OSError:
         logging.exception("Could not save Z3 report")
 
+    if Z3_AVAILABLE and Path(data_path).resolve() == DATA_PATH.resolve():
+        try:
+            effective_hash = data_hash or _file_sha256(Path(data_path))
+            save_z3_bundle(results_df, report_text, effective_hash)
+        except OSError:
+            logging.exception("Could not save precomputed Z3 bundle")
+
     return results_df, report_text
 
 
@@ -946,6 +1036,8 @@ if "z3_signature" not in st.session_state:
     st.session_state.z3_signature = None
 if "z3_report_text" not in st.session_state:
     st.session_state.z3_report_text = None
+if "z3_source" not in st.session_state:
+    st.session_state.z3_source = None
 
 st.markdown(
     '<div class="hero"><h1>LendVerify: AI-Powered Loan Verification System</h1>'
@@ -1009,14 +1101,16 @@ def _current_z3_signature():
         return None
     stat = DATA_PATH.stat()
     model_mtime = COMBINED_PATH.stat().st_mtime if COMBINED_PATH.exists() else 0.0
+    data_hash = _cached_file_sha256(str(DATA_PATH), stat.st_mtime)
     return (
         len(df),
         stat.st_mtime,
         stat.st_size,
+        data_hash,
         model_mtime,
         int(seed),
         str(target_col or TARGET_DEFAULT),
-        Z3_CACHE_VERSION,
+        POLICY_SCHEMA_HASH,
     )
 
 
@@ -1033,7 +1127,7 @@ def do_z3():
             # Clear cached Z3 output on explicit button click so updated logic/data always runs fresh.
             run_z3_verification.clear()
             stat = DATA_PATH.stat()
-            data_hash = _file_sha256(DATA_PATH)
+            data_hash = _cached_file_sha256(str(DATA_PATH), stat.st_mtime)
             model_mtime = COMBINED_PATH.stat().st_mtime if COMBINED_PATH.exists() else 0.0
             results_df, report_text = run_z3_verification(
                 str(DATA_PATH),
@@ -1047,6 +1141,7 @@ def do_z3():
         st.session_state.z3_result = results_df
         st.session_state.z3_report_text = report_text
         st.session_state.z3_signature = _current_z3_signature()
+        st.session_state.z3_source = "live"
         st.success(f"Z3 verification completed in {time.perf_counter() - start:.2f}s · {len(results_df)} borrowers.")
     except Exception as exc:
         logging.exception("Z3 verification failed")
@@ -1055,9 +1150,29 @@ def do_z3():
 
 def ensure_z3():
     sig = _current_z3_signature()
-    if st.session_state.z3_result is None or st.session_state.z3_signature != sig:
+    if sig is None:
         return None
-    return st.session_state.z3_result
+    if st.session_state.z3_result is not None and st.session_state.z3_signature == sig:
+        return st.session_state.z3_result
+    if Z3_PKL_PATH.exists():
+        stat = DATA_PATH.stat()
+        data_hash = _cached_file_sha256(str(DATA_PATH), stat.st_mtime)
+        loaded_bundle = load_precomputed_z3(
+            str(Z3_PKL_PATH),
+            Z3_PKL_PATH.stat().st_mtime,
+            data_hash,
+            POLICY_SCHEMA_HASH,
+        )
+        if loaded_bundle is not None:
+            res_df, report_text, generated_at = loaded_bundle
+            st.session_state.z3_result = res_df
+            st.session_state.z3_report_text = report_text
+            st.session_state.z3_signature = sig
+            st.session_state.z3_source = (
+                f"precomputed ({generated_at[:19]})" if generated_at else "precomputed"
+            )
+            return res_df
+    return None
 
 
 # ------------------------------- HOME -----------------------------------
@@ -1229,22 +1344,24 @@ elif page == "Z3 Verification":
                 unsafe_allow_html=True)
 
     if not Z3_AVAILABLE:
-        st.error("`z3-solver` is not installed. Run `pip install z3-solver` and restart the app.")
-    else:
-        col_a, col_b = st.columns([1, 3])
-        with col_a:
-            if st.button("🧮  Run Z3 verification", type="primary", use_container_width=True):
-                do_z3()
-        with col_b:
-            z3_df = ensure_z3()
-            if z3_df is not None:
-                st.caption(f"Last run: {len(z3_df)} borrowers verified")
-            else:
-                st.caption("Click to generate fresh Z3 results.")
+        st.warning("`z3-solver` is not available in this environment; showing precomputed `.pkl` results if present.")
 
-        if z3_df is None or z3_df.empty:
-            st.info("No Z3 results yet. Click **Run Z3 verification** above.")
+    col_a, col_b = st.columns([1, 3])
+    with col_a:
+        if st.button("🧮  Run Z3 verification", type="primary", use_container_width=True, disabled=not Z3_AVAILABLE):
+            do_z3()
+    with col_b:
+        z3_df = ensure_z3()
+        if z3_df is not None:
+            src_note = f" ({st.session_state.z3_source})" if st.session_state.z3_source else ""
+            st.caption(f"Loaded: {len(z3_df)} borrowers verified{src_note}")
         else:
+            st.caption("Click to generate fresh Z3 results.")
+
+    if z3_df is None or z3_df.empty:
+        st.info("No Z3 results yet. Click **Run Z3 verification** above.")
+    else:
+        if True:
             # ---- KPI cards ----
             total = len(z3_df)
             compliant_n = int(z3_df["All policies passed"].sum())
@@ -1342,10 +1459,28 @@ elif page == "Z3 Verification":
             if "Model predictions agree" in view_df.columns:
                 display_cols.append("Model predictions agree")
 
-            styled = view_df[display_cols].style
-            for rule in POLICY_RULES:
-                styled = styled.map(_style_rule, subset=[rule])
-            st.dataframe(styled, use_container_width=True, hide_index=True)
+            max_styled_rows = 1000
+            show_all_rows = False
+            if len(view_df) > max_styled_rows:
+                show_all_rows = st.checkbox(
+                    f"Show all {len(view_df):,} rows (unstyled for fast browser rendering)",
+                    value=False,
+                    key="z3_show_all",
+                )
+
+            if show_all_rows:
+                st.dataframe(view_df[display_cols], use_container_width=True, hide_index=True)
+            else:
+                preview_df = view_df[display_cols].head(max_styled_rows)
+                styled = preview_df.style
+                for rule in POLICY_RULES:
+                    styled = styled.map(_style_rule, subset=[rule])
+                st.dataframe(styled, use_container_width=True, hide_index=True)
+                if len(view_df) > max_styled_rows:
+                    st.caption(
+                        f"Showing styled preview of the first {max_styled_rows:,} of {len(view_df):,} matching borrowers. "
+                        "Use search/filter or download CSV for all rows."
+                    )
 
             # ---- Per-rule breakdown table ----
             st.markdown("### Per-rule breakdown")
